@@ -26,7 +26,7 @@ const About = () => {
             </div>
         {/* Grid 2 */}
         <div className="grid-default-color grid-2">
-            <p>skills/icons- python, java, react; can do a slide. later.</p>
+            <p>Technical skills- Python, Java, C, HTML, JavaScript, SQL, React, TailwindCSS, UI/UX.</p>
         </div>
         {/* Grid 3 */}
         <div className="grid-black-color grid-3">
