@@ -10,12 +10,12 @@ const items = [
   {
     icon: <FaLinkedin size={18} />,
     label: 'LinkedIn',
-    onClick: () => window.open('https://www.linkedin.com/in/your-linkedin/', '_blank'),
+    onClick: () => window.open('https://www.linkedin.com/in/ayesha-m-n', '_blank'),
   },
   {
     icon: <FaGithub size={18} />,
     label: 'GitHub',
-    onClick: () => window.open('https://github.com/your-github/', '_blank'),
+    onClick: () => window.open('http://github.com/AyeshaMahjabin ', '_blank'),
   },
   {
     icon: <HiDocument size={18} />,
@@ -25,7 +25,7 @@ const items = [
   {
     icon: <IoMdMail size={18} />,
     label: 'Email',
-    onClick: () => window.open('mailto:your-email@example.com', '_blank'),
+    onClick: () => window.location.href= 'mailto:amnishat@mun.ca',
   },
 ];
 

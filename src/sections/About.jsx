@@ -1,6 +1,7 @@
 import React from 'react';
 import {Globe} from "../components/Globe";
 import CopyEmailButton from "../components/CopyEmailButton";
+import { FocusCards } from "../components/FocusCards"; 
 
 const About = () => {
   return (<section id="about" className ="c-space section spacing">
@@ -22,11 +23,24 @@ const About = () => {
                     learn from experienced teams, and contribute to innovative projects.
                 </p>
             </div>
-            <div className="absolute inset-x-0 pointer-evets-none -bottom-4 h-1/2 sm:h-1/3 bg-gradient-to-t from-indigo" />
+            <div className="absolute inset-x-0 pointer-events-none -bottom-4 h-1/2 sm:h-1/3 bg-gradient-to-t from-indigo" />
             </div>
         {/* Grid 2 */}
-        <div className="grid-default-color grid-2">
-            <p>skills/icons- python, java, react; can do a slide. later.</p>
+        <div className="grid-default-color grid-2 flex items-center justify-center p-4">
+          <h3 className="absolute top-2 left-2 text-lg font-semibold italic">Technical Skills</h3>
+            <FocusCards
+              cards={[
+                  { title: "Python", src: "assets/python.svg" },
+                  { title: "Java", src: "assets/java.png" },
+                 // { title: "C", src: "assets/c.png" },
+                //  { title: "HTML", src: "assets/html.png" },
+                  { title: "javascript", src: "assets/javascript.svg" },
+                  //{ title: "SQL", src: "assets/sql.png" },
+                  { title: "react", src: "assets/react.svg" },
+                  { title: "tailwindcss", src: "assets/tailwindcss.svg" },
+                  { title: "UI/UX", src: "assets/ux-design.png" }
+              ]}
+          />
         </div>
         {/* Grid 3 */}
         <div className="grid-black-color grid-3">
