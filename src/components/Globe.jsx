@@ -1,7 +1,7 @@
 import createGlobe from "cobe";
 import { useEffect, useRef } from "react";
 
-/** A small light-mode globe with exactly one marker on it: St. John's. */
+/** A dark globe lit in the site palette, with one marker on it: St. John's. */
 export default function Globe({ className = "" }) {
   const canvasRef = useRef(null);
 
@@ -21,13 +21,15 @@ export default function Globe({ className = "" }) {
         height: width * 2,
         phi,
         theta: 0.36,
-        dark: 0,
-        diffuse: 1.25,
-        mapSamples: 14000,
-        mapBrightness: 5.6,
-        baseColor: [0.96, 0.94, 1],
-        markerColor: [1, 0.31, 0.64],
-        glowColor: [0.87, 0.85, 1],
+        dark: 1,
+        diffuse: 2.2,
+        mapSamples: 18000,
+        mapBrightness: 5.2,
+        /* landmass in cold violet, the marker in magenta, rim glow cyan —
+           the same three neons the rest of the page uses */
+        baseColor: [0.28, 0.16, 0.44],
+        markerColor: [1, 0.18, 0.53],
+        glowColor: [0.0, 0.55, 0.75],
         markers: [{ location: [47.5615, -52.7126], size: 0.1 }],
         onRender: (state) => {
           phi += 0.0035;

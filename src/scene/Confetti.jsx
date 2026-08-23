@@ -40,7 +40,7 @@ export default function Confetti() {
                   height: Math.random() > 0.4 ? size : size * 0.42,
                   borderRadius: Math.random() > 0.4 ? "50%" : 4,
                   background: COLORS[i % COLORS.length],
-                  border: "1.5px solid var(--lip)",
+                  border: "1px solid var(--line)",
                 }}
               />
             );

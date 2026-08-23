@@ -9,7 +9,7 @@ const REACTIONS = ["boop", "hey!", "again?", "ha", "okay okay"];
 
 /**
  * The robot, full size and unframed: a big candy disc behind it, a soft
- * contact shadow underneath, nothing else. It watches the cursor and jumps
+ * own halo from the model underneath. It watches the cursor and jumps
  * when you poke it.
  */
 export default function RobotHero() {
@@ -52,30 +52,10 @@ export default function RobotHero() {
           top: "6%",
           width: "80%",
           height: "80%",
-          background: "var(--butter)",
-          border: "1.5px solid var(--lip)",
+          background:
+            "radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--mood-solid) 20%, transparent) 0%, transparent 66%)",
+          filter: "blur(6px)",
         }}
-      />
-
-      {/* an offset outline, like a badly aligned print run */}
-      <div
-        aria-hidden="true"
-        className="absolute rounded-full"
-        style={{
-          left: "13%",
-          top: "2%",
-          width: "80%",
-          height: "80%",
-          border: "1.5px solid var(--ink)",
-          opacity: 0.28,
-        }}
-      />
-
-      {/* the step it stands on: catches the feet and gives the figure ground */}
-      <div
-        aria-hidden="true"
-        className="absolute left-1/2 top-[68%] h-[9%] w-[46%] -translate-x-1/2 rounded-[50%]"
-        style={{ background: "rgba(26,22,38,0.18)", filter: "blur(18px)" }}
       />
 
       <button
@@ -93,16 +73,6 @@ export default function RobotHero() {
         )}
       </button>
 
-      {/* foreground half of the step, so the robot stands *in* the scene */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[70%] h-[8%] w-[44%] -translate-x-1/2 rounded-[50%]"
-        style={{
-          background: "color-mix(in srgb, var(--butter) 78%, var(--ink) 12%)",
-          border: "1.5px solid var(--lip)",
-        }}
-      />
-
       {/* the only words it ever says */}
       <AnimatePresence>
         {pop && (
@@ -112,14 +82,15 @@ export default function RobotHero() {
             animate={{ opacity: 1, y: -14, scale: 1, rotate: -6 }}
             exit={{ opacity: 0, y: -40, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 320, damping: 18 }}
-            className="display absolute left-[66%] top-[12%] rounded-full px-4 py-2 text-[18px]"
+            className="absolute left-[66%] top-[12%] rounded-md border px-3 py-1.5 font-mono text-[13px] lowercase"
             style={{
-              background: "var(--ink)",
-              color: "var(--paper)",
-              boxShadow: "0 10px 24px -16px rgba(26,22,38,0.9)",
+              background: "rgba(10,6,17,0.9)",
+              color: "var(--cyan)",
+              borderColor: "color-mix(in srgb, var(--cyan) 40%, transparent)",
+              boxShadow: "0 0 24px -8px var(--cyan)",
             }}
           >
-            {pop.word}
+            &gt; {pop.word}
           </motion.span>
         )}
       </AnimatePresence>

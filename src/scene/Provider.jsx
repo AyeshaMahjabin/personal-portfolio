@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { setEnabled } from "../lib/fluid";
 import { MOODS, SceneCtx } from "./store";
 
 const prefersReduced = () =>
@@ -11,8 +12,12 @@ const isCoarse = () =>
 export function SceneProvider({ children }) {
   const [reduced] = useState(prefersReduced);
   const [coarse] = useState(isCoarse);
-  const [effects, setEffects] = useState(() => !prefersReduced() && !isCoarse());
-  const [mood, setMood] = useState("pink");
+  /* Off on arrival — the fluid is opt-in from the Playground switch. The sim
+     still mounts unconditionally and just runs at zero gain, so turning it on
+     is instant and no flag can ever make the canvas disappear the way the old
+     mount-gate did. */
+  const [effects, setEffects] = useState(false);
+  const [mood, setMood] = useState("sky");
   const [toasts, setToasts] = useState([]);
   const [pokes, setPokes] = useState(0);
   const found = useRef(new Set());
@@ -76,11 +81,19 @@ export function SceneProvider({ children }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [findSecret]);
 
+  /* The switch now silences the simulation instead of unmounting it. */
+  useEffect(() => {
+    setEnabled(effects);
+  }, [effects]);
+
   /* Paint the current mood onto the document so CSS can use it anywhere. */
   useEffect(() => {
-    const m = MOODS[mood] || MOODS.pink;
+    const m = MOODS[mood] || MOODS.sky;
     document.documentElement.style.setProperty("--mood", m.tint);
     document.documentElement.style.setProperty("--mood-solid", m.solid);
+    /* the opposing neon, so gradients always span two hues no matter which
+       accent is current */
+    document.documentElement.style.setProperty("--mood-counter", m.counter);
   }, [mood]);
 
   const value = useMemo(

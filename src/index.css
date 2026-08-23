@@ -1,75 +1,132 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,SOFT,WONK,wght@0,9..144,0..100,0..1,400..900;1,9..144,0..100,0..1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500;700&display=swap");
 @import "tailwindcss";
 
 /* ==================================================================
-   Candy on paper.
-   Warm off-white ground, ink type, four loud accents used as solid
-   blocks — never as gradients-for-the-sake-of-gradients. Every surface
-   is a physical object: it has a lip, a shadow, and it presses down
-   when you touch it.
+   MAGENTA CIRCUIT
+   Near-black ground. Neon is a light source, never a fill: it is a
+   hairline, a glow behind glass, a rim on a 3D edge. Nothing large is
+   ever painted neon. Type is one tight geometric display plus one mono
+   used only for instrument labels. Nothing is tilted; everything sits
+   on the grid. Precision is the aesthetic.
    ==================================================================*/
 
 :root {
-  --paper: #fbf9f5;
-  --paper-warm: #f5efe6;
-  --card: #ffffff;
-  --ink: #1a1626;
-  --ink-soft: #5f5878;
-  --ink-faint: #a49dba;
+  /* ---- ground ------------------------------------------------- */
+  --ground: #0a0611;
+  --ground-lift: #0e0918;
+  --panel: #140c1e;
+  --panel-hi: #1b1128;
 
-  --pink: #ff4fa3;
-  --violet: #7c5cff;
-  --lime: #b8f02e;
-  --sky: #46c8ff;
-  --butter: #ffd84d;
+  /* Legacy names kept, values inverted. --paper was the light ground
+     and --ink the dark type; on a dark site those two swap roles and
+     every existing `background: var(--paper)` / `color: var(--ink)`
+     pair keeps meaning exactly what it meant before. */
+  --paper: #0a0611;
+  --paper-warm: #0e0918;
+  --card: #140c1e;
+  --ink: #f0e9f7;
+  --ink-soft: #a79cb8;
+  --ink-faint: #6e6484;
 
-  --pink-tint: #ffe7f2;
-  --violet-tint: #eeeaff;
-  --lime-tint: #f0fbd8;
-  --sky-tint: #e2f4ff;
-  --butter-tint: #fff5d4;
+  /* ---- neon --------------------------------------------------- */
+  --magenta: #ff2e88;
+  --cyan: #00d9ff;
+  --violet-neon: #b14bff;
+  --chrome: #c8cbd9;
 
-  /* the section colour currently in view — animated, not jumpy */
-  --mood: #ffe7f2;
-  --mood-solid: #ff4fa3;
+  /* the five old accents collapsed onto the three real ones */
+  --pink: #ff2e88;
+  --sky: #00d9ff;
+  --violet: #b14bff;
+  --lime: #00d9ff;
+  --butter: #c8cbd9;
+  --c-mint: #00d9ff;
 
-  --line: rgba(26, 22, 38, 0.1);
-  --lip: rgba(26, 22, 38, 0.14);
+  /* tints are translucent now — they sit *over* the dark ground
+     instead of being pale opaque paper */
+  --pink-tint: rgba(255, 46, 136, 0.12);
+  --violet-tint: rgba(177, 75, 255, 0.12);
+  --lime-tint: rgba(0, 217, 255, 0.1);
+  --sky-tint: rgba(0, 217, 255, 0.1);
+  --butter-tint: rgba(200, 203, 217, 0.1);
 
-  --r-xl: 40px;
-  --r-lg: 28px;
-  --r-md: 20px;
-  --r-sm: 14px;
+  /* the section accent currently in view — animated, not jumpy */
+  --mood: rgba(0, 217, 255, 0.1);
+  --mood-solid: #00d9ff;
+  --mood-counter: #b14bff;
 
-  --shadow-soft: 0 24px 50px -32px rgba(26, 22, 38, 0.45);
-  --shadow-lift: 0 34px 60px -34px rgba(26, 22, 38, 0.5);
+  /* ---- structure ---------------------------------------------- */
+  --line: rgba(240, 233, 247, 0.09);
+  --lip: rgba(240, 233, 247, 0.14);
+  --glass: rgba(240, 233, 247, 0.045);
+  --scrim: rgba(6, 3, 12, 0.72);
+
+  /* tight radii. instrument panel, not candy */
+  --r-xl: 18px;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 6px;
+
+  --shadow-soft: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --shadow-lift: 0 26px 60px -28px rgba(0, 0, 0, 1);
+
+  /* ---- one motion system -------------------------------------- */
+  /* every moving thing on this site uses these two values, so a card,
+     a button and the cat all behave like the same material */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 260ms;
+  --dur-fast: 160ms;
 }
 
 @theme {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-paper: #fbf9f5;
-  --color-card: #ffffff;
-  --color-ink: #1a1626;
-  --color-inksoft: #5f5878;
-  --color-pink: #ff4fa3;
-  --color-violet: #7c5cff;
-  --color-lime: #b8f02e;
-  --color-sky: #46c8ff;
-  --color-butter: #ffd84d;
+  --color-ground: #0a0611;
+  --color-groundlift: #0e0918;
+  --color-panel: #140c1e;
+  --color-panelhi: #1b1128;
+  --color-paper: #0a0611;
+  --color-card: #140c1e;
+  --color-ink: #f0e9f7;
+  --color-inksoft: #a79cb8;
+  --color-inkfaint: #6e6484;
+  --color-line: rgba(240, 233, 247, 0.09);
+  --color-lip: rgba(240, 233, 247, 0.14);
+  --color-glass: rgba(240, 233, 247, 0.045);
+  --color-magenta: #ff2e88;
+  --color-cyan: #00d9ff;
+  --color-violetneon: #b14bff;
+  --color-chrome: #c8cbd9;
+  --color-pink: #ff2e88;
+  --color-sky: #00d9ff;
+  --color-violet: #b14bff;
+  --color-lime: #00d9ff;
+  --color-butter: #c8cbd9;
 
-  --animate-marquee: marquee 34s linear infinite;
-  --animate-bob: bob 5s ease-in-out infinite;
-  --animate-spin-slow: spin 22s linear infinite;
+  --animate-marquee: marquee 60s linear infinite;
+  --animate-bob: bob 7s ease-in-out infinite;
+  --animate-scan: scan 7s linear infinite;
+  --animate-flicker: flicker 4.5s steps(1, end) infinite;
 
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
   @keyframes bob {
-    0%, 100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-10px) rotate(1deg); }
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes scan {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(100vh); }
+  }
+  @keyframes flicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.4; }
+    98% { opacity: 1; }
+    99% { opacity: 0.7; }
   }
 }
 
@@ -81,6 +138,7 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  background: var(--ground);
 }
 
 body {
@@ -88,8 +146,12 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
   color: var(--ink);
-  background: var(--paper);
   overflow-x: hidden;
+  /* Deliberately NO background here. `html` already paints the ground, and a
+     root background propagates to the canvas. Setting it on <body> as well
+     made body's background a normal in-flow block background — which paints
+     *after* negative z-index descendants — so every fixed background layer
+     (Ground, Flora) was covered by an opaque rectangle and never appeared. */
 }
 
 section[id] {
@@ -97,16 +159,16 @@ section[id] {
 }
 
 ::selection {
-  background: var(--lime);
-  color: var(--ink);
+  background: var(--magenta);
+  color: #ffffff;
 }
 
-::-webkit-scrollbar { width: 12px; }
-::-webkit-scrollbar-track { background: var(--paper-warm); }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--ground); }
 ::-webkit-scrollbar-thumb {
-  background: var(--ink);
+  background: var(--magenta);
   border-radius: 999px;
-  border: 4px solid var(--paper-warm);
+  border: 3px solid var(--ground);
   background-clip: content-box;
 }
 
@@ -119,25 +181,120 @@ section[id] {
   @apply relative py-24 md:py-36;
 }
 
+/* Alternating surfaces. Every section sat on the same flat black, so the page
+   had no tonal rhythm at all — you could not tell one band from the next while
+   scrolling. A lifted section picks up its own accent as a wide vertical wash
+   and closes with hairlines top and bottom. Full-bleed: .section spans the
+   viewport, .shell is the column inside it. */
+.section[data-tone="lift"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--mood-solid) 7%, var(--ground-lift)) 22%,
+      color-mix(in srgb, var(--mood-solid) 9%, var(--ground-lift)) 78%,
+      transparent 100%
+    );
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* a full-bleed accent hairline that glows, used to close a band */
+.section[data-tone="lift"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--mood-solid) 35%,
+    var(--mood-solid) 65%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
 /* ---------------- type ---------------- */
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-variation-settings: "SOFT" 24, "WONK" 1, "opsz" 96;
-  letter-spacing: -0.022em;
-  line-height: 0.98;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
 }
 
+/* the outlined counterpart — used for the half of a headline that should
+   recede, so a single line carries two weights of emphasis */
+.display-ghost {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ink-soft);
+}
+
+/* a label set vertically down the left edge of a section */
+.rail-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Was a wonky serif italic. Now the mono voice inside a display line —
+   a readout dropped into a headline. Same hook, opposite temperature. */
 .display-italic {
-  font-style: italic;
-  font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 96;
+  font-family: var(--font-mono);
+  font-weight: 300;
+  font-style: normal;
+  letter-spacing: -0.01em;
+}
+
+/* Type that carries the accent as a gradient rather than a flat fill — the
+   only place on the site where two neons meet inside one object. */
+.display-accent {
+  background-image: linear-gradient(
+    100deg,
+    var(--mood-solid) 0%,
+    color-mix(in srgb, var(--mood-solid) 50%, var(--mood-counter)) 55%,
+    var(--mood-counter) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* the instrument label: 03 / STACK, ST. JOHN'S · UTC−03:30 */
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 .kicker {
-  @apply inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-semibold uppercase;
-  letter-spacing: 0.08em;
-  background: var(--ink);
-  color: var(--paper);
+  @apply inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-medium uppercase;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--mood-solid) 34%, transparent);
+  background: var(--mood);
+  color: var(--mood-solid);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
 }
 
 .lede {
@@ -146,75 +303,108 @@ section[id] {
 }
 
 /* ---------------- objects ---------------- */
-/* Everything you can touch sits on a lip and presses when clicked. */
+/* Every panel is glass over the city: a hairline, a whisper of fill, and
+   a lit top edge. No lip, no press — the toy shadow is gone. */
 .toy {
-  background: var(--card);
-  border: 1.5px solid var(--lip);
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(240, 233, 247, 0.05) 0%, rgba(240, 233, 247, 0.015) 100%),
+    var(--panel);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: 0 5px 0 var(--lip), var(--shadow-soft);
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1),
-              background 260ms ease;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(240, 233, 247, 0.06);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
 }
 
 .toy-press:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 9px 0 var(--lip), var(--shadow-lift);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--mood-solid) 45%, transparent);
+  box-shadow:
+    var(--shadow-lift),
+    inset 0 1px 0 rgba(240, 233, 247, 0.08),
+    0 0 32px -10px color-mix(in srgb, var(--mood-solid) 70%, transparent);
 }
 
 .toy-press:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 var(--lip), 0 12px 24px -20px rgba(26, 22, 38, 0.5);
+  transform: translateY(-1px);
 }
 
 .pill {
-  @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold;
-  border: 1.5px solid var(--lip);
-  background: var(--card);
-  color: var(--ink);
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease,
-              color 200ms ease, border-color 200ms ease;
+  @apply inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase;
+  font-family: var(--font-mono);
+  letter-spacing: 0.16em;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--glass);
+  color: var(--ink-soft);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
 }
 
 .pill:hover {
-  transform: translateY(-2px) rotate(-1deg);
+  color: var(--ink);
+  border-color: var(--lip);
+}
+
+/* the one pill that carries the accent — hairline and text, never a fill */
+.pill-accent {
+  border-color: color-mix(in srgb, var(--mood-solid) 40%, transparent);
+  background: var(--mood);
+  color: var(--mood-solid);
 }
 
 /* ---------------- buttons ---------------- */
 .btn {
-  @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-[15px] font-bold;
+  @apply relative inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold;
   cursor: pointer;
-  border: 1.5px solid var(--ink);
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease,
-              background 200ms ease, color 200ms ease;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  letter-spacing: -0.01em;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur) var(--ease),
+              background var(--dur) var(--ease), color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
   white-space: nowrap;
 }
 
+/* primary: the one bright object on the page */
 .btn-ink {
   background: var(--ink);
-  color: var(--paper);
-  box-shadow: 0 5px 0 rgba(26, 22, 38, 0.35);
+  color: var(--ground);
+  box-shadow: 0 0 30px -12px rgba(240, 233, 247, 0.5);
+}
+.btn-ink:hover {
+  box-shadow: 0 0 40px -8px rgba(240, 233, 247, 0.7);
 }
 
 .btn-pop {
-  background: var(--pink);
-  color: var(--ink);
-  box-shadow: 0 5px 0 rgba(26, 22, 38, 0.35);
+  background: var(--magenta);
+  color: #ffffff;
+  box-shadow: 0 0 34px -10px var(--magenta);
+}
+.btn-pop:hover {
+  box-shadow: 0 0 46px -6px var(--magenta);
 }
 
 .btn-plain {
-  background: var(--card);
+  background: transparent;
   color: var(--ink);
-  box-shadow: 0 5px 0 var(--lip);
+  border-color: var(--lip);
+}
+.btn-plain:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 28px -14px var(--cyan);
 }
 
-.btn:hover { transform: translateY(-3px); }
-.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lip); }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
 
 /* ---------------- links ---------------- */
 .link-underline {
   position: relative;
-  font-weight: 600;
+  font-weight: 500;
+  transition: color var(--dur) var(--ease);
 }
 .link-underline::after {
   content: "";
@@ -222,24 +412,38 @@ section[id] {
   left: 0;
   right: 0;
   bottom: -3px;
-  height: 3px;
-  border-radius: 3px;
+  height: 1px;
   background: var(--mood-solid);
+  box-shadow: 0 0 10px var(--mood-solid);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--dur) var(--ease);
 }
+.link-underline:hover { color: var(--mood-solid); }
 .link-underline:hover::after { transform: scaleX(1); }
 
-/* ---------------- misc ---------------- */
+/* ---------------- atmosphere ---------------- */
+/* Was paper grain. Now the fine horizontal scanline of a screen you are
+   looking *at* rather than through. Kept far below the threshold of
+   being noticed on purpose. */
 .grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.028) 0px,
+    rgba(255, 255, 255, 0.028) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.hairline {
+  border-top: 1px solid var(--line);
 }
 
 :where(a, button, [tabindex]):focus-visible {
-  outline: 3px solid var(--violet);
+  outline: 2px solid var(--cyan);
   outline-offset: 3px;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {

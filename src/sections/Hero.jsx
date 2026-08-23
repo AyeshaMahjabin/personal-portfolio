@@ -1,21 +1,22 @@
 import { motion } from "motion/react";
 import RobotHero from "../scene/RobotHero";
-import Sticker from "../ui/Sticker";
 import WordCycler from "../ui/WordCycler";
-import { useMood, useScene } from "../scene/store";
+import ScrambleText from "../ui/ScrambleText";
+import Magnetic from "../ui/Magnetic";
+import { useMood, useScene, ZONE } from "../scene/store";
 import { heroWords, links } from "../data/site";
 
 const spring = { type: "spring", stiffness: 120, damping: 18, mass: 0.9 };
 
 export default function Hero() {
-  const ref = useMood("pink");
+  const ref = useMood("sky", ZONE.LOUD);
   const { reduced } = useScene();
 
   const rise = (delay) =>
     reduced
       ? {}
       : {
-          initial: { opacity: 0, y: 30 },
+          initial: { opacity: 0, y: 24 },
           animate: { opacity: 1, y: 0 },
           transition: { ...spring, delay },
         };
@@ -24,57 +25,75 @@ export default function Hero() {
     <section
       id="home"
       ref={ref}
-      className="relative flex min-h-[100svh] items-center pb-20 pt-32 lg:pt-28"
+      className="relative flex min-h-[100svh] items-center pb-24 pt-32 lg:pt-28"
     >
-      <div className="shell grid w-full items-center gap-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
+      <div className="shell grid w-full items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
         <div className="relative order-1">
-          <motion.p {...rise(0)} className="flex flex-wrap items-center gap-2">
-            <span className="pill" style={{ background: "var(--lime)" }}>
-              Software Development Intern
-            </span>
-            <span className="pill">Final POS · St. John&apos;s</span>
-          </motion.p>
-
-          <motion.h1 {...rise(0.07)} className="display mt-7 text-[clamp(3rem,8.4vw,6.4rem)]">
-            Software
-            <br />
-            that feels{" "}
-            <span className="display-italic" style={{ color: "var(--pink)" }}>
-              good
-            </span>
-            <br />
-            to use.
-          </motion.h1>
-
-          <motion.p {...rise(0.14)} className="lede mt-7 max-w-[30rem] text-[18px]">
-            I&apos;m <strong style={{ color: "var(--ink)" }}>Ayesha</strong> — a Computer Science
-            student at Memorial University, building across the whole stack: frontend features
-            inside a real production codebase, backend work, Playwright tests, and the debugging
-            that comes with all of it.
-          </motion.p>
-
-          <motion.div {...rise(0.2)} className="mt-7">
-            <p className="display-italic text-[18px]" style={{ color: "var(--ink-soft)" }}>
-              currently into
-            </p>
-            <p className="display mt-1 text-[clamp(1.3rem,2.6vw,1.9rem)]">
-              <WordCycler words={heroWords} />
-            </p>
+          {/* availability, as a live indicator rather than a badge */}
+          <motion.div {...rise(0)} className="flex items-center gap-2.5">
+            <motion.span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{
+                background: "var(--mood-solid)",
+                boxShadow: "0 0 10px var(--mood-solid)",
+              }}
+              animate={reduced ? undefined : { opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <ScrambleText
+              text="available — 2026"
+              className="font-mono text-[11px] uppercase tracking-[0.24em] text-inksoft"
+            />
           </motion.div>
 
+          {/* the name, at the size it deserves */}
+          <motion.h1
+            {...rise(0.06)}
+            className="display mt-7 text-[clamp(2.9rem,9.5vw,7rem)] font-normal leading-[0.92] tracking-[-0.03em]"
+          >
+            <ScrambleText as="span" text="AYESHA" className="block" />
+            <ScrambleText
+              as="span"
+              text="MAHJABIN"
+              speed={90}
+              className="display-accent block"
+            />
+          </motion.h1>
+
+          <motion.div
+            {...rise(0.14)}
+            className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono
+                       text-[11px] uppercase tracking-[0.2em] text-inkfaint"
+          >
+            <span>Software Developer</span>
+            <span style={{ color: "var(--mood-solid)" }}>/</span>
+            <span>St. John&apos;s NL</span>
+            <span style={{ color: "var(--mood-solid)" }}>/</span>
+            <span>UTC−03:30</span>
+          </motion.div>
+
+          <motion.p {...rise(0.2)} className="lede mt-8 max-w-[27rem] text-[17px]">
+            Frontend features inside a production codebase. Backend when it&apos;s needed.
+            Playwright, and the debugging in between.
+          </motion.p>
+
           <motion.div {...rise(0.26)} className="mt-10 flex flex-wrap items-center gap-3">
-            <a href="#work" className="btn btn-ink">
-              See the work
-            </a>
-            <a href={links.resume} target="_blank" rel="noreferrer" className="btn btn-plain">
-              Résumé ↗
-            </a>
+            <Magnetic>
+              <a href="#work" className="btn btn-ink">
+                See the work
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a href={links.resume} target="_blank" rel="noreferrer" className="btn btn-plain">
+                Résumé ↗
+              </a>
+            </Magnetic>
             <span className="flex items-center gap-4 pl-1">
               <a
                 href={links.github}
                 target="_blank"
                 rel="noreferrer"
-                className="link-underline text-[15px]"
+                className="link-underline text-[14px]"
               >
                 GitHub
               </a>
@@ -82,36 +101,33 @@ export default function Hero() {
                 href={links.linkedin}
                 target="_blank"
                 rel="noreferrer"
-                className="link-underline text-[15px]"
+                className="link-underline text-[14px]"
               >
                 LinkedIn
               </a>
+            </span>
+          </motion.div>
+
+          {/* the one line that changes — a readout, bottom of the block */}
+          <motion.div
+            {...rise(0.32)}
+            className="mt-12 flex items-baseline gap-3 border-t border-line pt-5"
+          >
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-inkfaint">
+              currently
+            </span>
+            <span className="font-mono text-[13px] text-inksoft">
+              <WordCycler words={heroWords} />
+            </span>
+            <span className="ml-auto hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-inkfaint sm:flex">
+              <kbd className="rounded border border-line px-1.5 py-0.5">⌘K</kbd>
+              anywhere
             </span>
           </motion.div>
         </div>
 
         <div className="relative order-2">
           <RobotHero />
-
-          <div className="absolute -top-2 right-2 hidden sm:block">
-            <Sticker rotate={12} color="var(--butter)" size={92} label="Poke me">
-              <span className="display text-[15px] leading-tight">
-                poke
-                <br />
-                me →
-              </span>
-            </Sticker>
-          </div>
-
-          <div className="absolute -bottom-2 left-0 hidden sm:block">
-            <Sticker rotate={-10} color="var(--sky)" size={78} label="Made in Newfoundland">
-              <span className="display text-[13px] leading-tight">
-                made in
-                <br />
-                NL
-              </span>
-            </Sticker>
-          </div>
         </div>
       </div>
     </section>

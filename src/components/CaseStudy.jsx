@@ -29,7 +29,7 @@ export default function CaseStudy({ project, onClose, onNext }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          style={{ background: "rgba(26,22,38,0.35)", backdropFilter: "blur(8px)" }}
+          style={{ background: "var(--scrim)", backdropFilter: "blur(8px)" }}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.article
@@ -44,7 +44,7 @@ export default function CaseStudy({ project, onClose, onNext }) {
           >
             <div
               className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 sm:px-9"
-              style={{ background: "var(--card)", borderBottom: "1.5px solid var(--lip)" }}
+              style={{ background: "var(--card)", borderBottom: "1px solid var(--line)" }}
             >
               <p className="text-[13px] font-bold" style={{ color: "var(--ink-soft)" }}>
                 {project.index} · {project.kind} · {project.period}
@@ -52,7 +52,7 @@ export default function CaseStudy({ project, onClose, onNext }) {
               <button
                 onClick={onClose}
                 className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[18px]"
-                style={{ background: "var(--ink)", color: "var(--paper)" }}
+                style={{ background: "var(--panel-hi)", color: "var(--ink)" }}
                 aria-label="Close"
               >
                 ×

@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
-import Sticker from "../ui/Sticker";
 import { about, profile } from "../data/site";
 import { useMood, useScene } from "../scene/store";
 
@@ -17,6 +16,7 @@ export default function About() {
     <section id="about" ref={moodRef} className="section">
       <div className="shell" ref={ref}>
         <SectionHeading
+          index="05"
           kicker="about"
           title="The person"
           italic="behind it."
@@ -59,15 +59,9 @@ export default function About() {
                 whileHover={reduced ? undefined : { rotate: 0, y: -8 }}
                 transition={{ type: "spring", stiffness: 220, damping: 20 }}
               >
-                <span
-                  aria-hidden="true"
-                  className="absolute -top-4 left-1/2 z-10 h-8 w-28 -translate-x-1/2 rotate-[-4deg] rounded-[3px]"
-                  style={{ background: "rgba(255,255,255,0.75)", border: "1px solid var(--lip)" }}
-                />
-
                 <div
                   className="relative aspect-[4/5] overflow-hidden rounded-[18px]"
-                  style={{ background: "var(--mood)", border: "1.5px solid var(--lip)" }}
+                  style={{ background: "var(--mood)", border: "1px solid var(--line)" }}
                 >
                   <motion.img
                     src="/assets/coding-pov.png"
@@ -87,16 +81,7 @@ export default function About() {
                 </p>
               </motion.div>
 
-              <div className="absolute -right-5 -top-7">
-                <Sticker rotate={14} color="var(--lime)" size={92} label="Open to work">
-                  <span className="display text-[14px] leading-tight">
-                    open
-                    <br />
-                    to work
-                  </span>
-                </Sticker>
-              </div>
-            </div>
+                          </div>
           </Reveal>
         </div>
       </div>

@@ -6,7 +6,6 @@ import { links } from "../data/site";
 const NAV = [
   { id: "work", label: "Work" },
   { id: "experience", label: "Experience" },
-  { id: "mindset", label: "How I think" },
   { id: "skills", label: "Toolkit" },
   { id: "playground", label: "Playground" },
   { id: "about", label: "About" },
@@ -52,12 +51,12 @@ export default function Navbar() {
       <div className="shell">
         <motion.nav
           animate={{
-            backgroundColor: lifted ? "#ffffff" : "rgba(255,255,255,0)",
-            borderColor: lifted ? "var(--lip)" : "rgba(0,0,0,0)",
-            boxShadow: lifted ? "0 5px 0 var(--lip), 0 22px 40px -34px rgba(26,22,38,0.6)" : "none",
+            backgroundColor: lifted ? "rgba(10,6,17,0.72)" : "rgba(10,6,17,0)",
+            borderColor: lifted ? "var(--line)" : "rgba(0,0,0,0)",
+            boxShadow: lifted ? "0 20px 44px -34px rgba(0,0,0,1)" : "none",
           }}
           transition={{ duration: 0.3 }}
-          className="flex items-center justify-between gap-3 rounded-full border-[1.5px] px-3 py-2"
+          className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2 backdrop-blur-xl"
         >
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" })}
@@ -65,14 +64,15 @@ export default function Navbar() {
             aria-label="Back to top"
           >
             <motion.span
-              className="grid h-8 w-8 place-items-center rounded-full text-[15px]"
-              style={{ background: "var(--mood-solid)", border: "1.5px solid var(--lip)" }}
-              whileHover={reduced ? undefined : { rotate: 18, scale: 1.1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 14 }}
-            >
-              ✦
-            </motion.span>
-            <span className="display text-[19px]">Ayesha</span>
+              className="grid h-2 w-2 place-items-center rounded-full"
+              style={{
+                background: "var(--mood-solid)",
+                boxShadow: "0 0 12px 1px var(--mood-solid)",
+              }}
+              animate={reduced ? undefined : { opacity: [1, 0.35, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span className="display text-[17px] tracking-[-0.03em]">Ayesha</span>
           </button>
 
           <ul className="hidden items-center gap-0.5 lg:flex">
@@ -105,7 +105,7 @@ export default function Navbar() {
             <button
               onClick={() => setOpen((v) => !v)}
               className="grid h-10 w-10 place-items-center rounded-full lg:hidden"
-              style={{ border: "1.5px solid var(--lip)", background: "var(--card)" }}
+              style={{ border: "1px solid var(--line)", background: "var(--card)" }}
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
             >

@@ -16,7 +16,10 @@ export default class Boundary extends Component {
   }
 
   componentDidCatch(error) {
-    if (import.meta.env.DEV) console.warn("[boundary] recovered from:", error);
+    // Never swallow this silently — a dead canvas used to look identical to
+    // a working one, which cost a lot of time to notice.
+    console.error("[boundary] canvas failed:", error);
+    this.props.onFail?.(error);
   }
 
   render() {

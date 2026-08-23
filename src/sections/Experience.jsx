@@ -5,7 +5,8 @@ import Reveal from "../ui/Reveal";
 import { useMood, useScene } from "../scene/store";
 import { experience } from "../data/site";
 
-const KEY_COLORS = ["var(--pink)", "var(--violet)", "var(--lime)", "var(--sky)", "var(--butter)"];
+/* One accent for the whole control, not five — the tabs are a segmented
+   selector, and colour-coding them made five equal things look unrelated. */
 
 export default function Experience() {
   const ref = useMood("sky");
@@ -14,9 +15,10 @@ export default function Experience() {
   const facet = experience.facets[active];
 
   return (
-    <section id="experience" ref={ref} className="section">
+    <section id="experience" ref={ref} className="section" data-tone="lift">
       <div className="shell">
         <SectionHeading
+          index="02"
           kicker="work experience"
           title="Inside a"
           italic="real codebase."
@@ -26,15 +28,18 @@ export default function Experience() {
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           {/* the role ------------------------------------------------ */}
           <Reveal>
-            <div className="toy h-full p-7" style={{ background: "var(--mood)" }}>
+            <div className="toy h-full p-7">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span
                     className="absolute inline-flex h-full w-full rounded-full opacity-70"
-                    style={{ background: "var(--ink)" }}
+                    style={{
+                      background: "var(--mood-solid)",
+                      boxShadow: "0 0 10px var(--mood-solid)",
+                    }}
                   />
                 </span>
-                <span className="text-[13px] font-bold uppercase tracking-wider">Current</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-inksoft">Current</span>
               </div>
 
               <h3 className="display mt-5 text-[clamp(2rem,4vw,2.8rem)]">{experience.company}</h3>
@@ -44,8 +49,8 @@ export default function Experience() {
               </p>
 
               <div
-                className="my-6 h-[1.5px] w-full"
-                style={{ background: "var(--lip)" }}
+                className="my-6 h-px w-full"
+                style={{ background: "var(--line)" }}
               />
 
               <p className="lede text-[16px]">{experience.intro}</p>
@@ -55,8 +60,7 @@ export default function Experience() {
                   (t) => (
                     <li
                       key={t}
-                      className="rounded-full px-3 py-1.5 text-[12.5px] font-bold"
-                      style={{ background: "var(--card)", border: "1.5px solid var(--lip)" }}
+                      className="rounded-md border border-line bg-glass px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-inksoft"
                     >
                       {t}
                     </li>
@@ -69,24 +73,30 @@ export default function Experience() {
           {/* the keys ------------------------------------------------- */}
           <Reveal delay={0.08}>
             <div className="toy h-full overflow-hidden p-4 sm:p-6">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 border-b border-line pb-px">
                 {experience.facets.map((f, i) => (
                   <motion.button
                     key={f.id}
                     onClick={() => setActive(i)}
                     data-touchable
-                    className="rounded-full px-4 py-2.5 text-[14px] font-bold"
-                    style={{
-                      background: active === i ? KEY_COLORS[i % KEY_COLORS.length] : "var(--paper)",
-                      border: "1.5px solid var(--lip)",
-                      boxShadow: active === i ? "0 2px 0 var(--lip)" : "0 4px 0 var(--lip)",
-                    }}
-                    animate={{ y: active === i ? 2 : 0 }}
-                    whileHover={reduced ? undefined : { y: active === i ? 2 : -2 }}
+                    className="relative rounded-md px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors duration-[200ms]"
+                    style={{ color: active === i ? "var(--mood-solid)" : "var(--ink-faint)" }}
+                    whileHover={reduced ? undefined : { y: -1 }}
                     transition={{ type: "spring", stiffness: 400, damping: 22 }}
                     aria-pressed={active === i}
                   >
                     {f.label}
+                    {active === i && (
+                      <motion.span
+                        layoutId="facet-underline"
+                        className="absolute inset-x-2 -bottom-px h-px"
+                        style={{
+                          background: "var(--mood-solid)",
+                          boxShadow: "0 0 10px var(--mood-solid)",
+                        }}
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      />
+                    )}
                   </motion.button>
                 ))}
               </div>
@@ -106,8 +116,8 @@ export default function Experience() {
                       {facet.lines.map((line) => (
                         <li key={line} className="flex gap-3 text-[16px]">
                           <span
-                            className="mt-[9px] h-2 w-2 shrink-0 rounded-full"
-                            style={{ background: KEY_COLORS[active % KEY_COLORS.length] }}
+                            className="mt-[10px] h-1 w-1 shrink-0 rounded-full"
+                            style={{ background: "var(--mood-solid)" }}
                           />
                           <span className="lede">{line}</span>
                         </li>
@@ -115,10 +125,13 @@ export default function Experience() {
                     </ul>
 
                     <p
-                      className="display-italic mt-7 text-[18px] leading-snug"
-                      style={{ color: "var(--ink)" }}
+                      className="mt-8 border-l pl-5 text-[17px] leading-snug"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--mood-solid) 45%, transparent)",
+                        color: "var(--ink)",
+                      }}
                     >
-                      “{facet.note}”
+                      {facet.note}
                     </p>
                   </motion.div>
                 </AnimatePresence>

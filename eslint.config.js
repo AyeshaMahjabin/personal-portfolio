@@ -25,9 +25,15 @@ export default defineConfig([
     rules: {
       // No eslint-plugin-react here, so identifiers only referenced inside JSX
       // (motion.div, AnimatePresence, ...) read as unused. Allow them.
+      // argsIgnorePattern covers the polymorphic `as` prop in ui/primitives,
+      // where the destructured component is a parameter rather than a variable.
       'no-unused-vars': [
         'error',
-        { varsIgnorePattern: '^([A-Z_]|motion$)', args: 'after-used' },
+        {
+          varsIgnorePattern: '^([A-Z_]|motion$)',
+          argsIgnorePattern: '^[A-Z_]',
+          args: 'after-used',
+        },
       ],
     },
   },

@@ -1,11 +1,8 @@
-import { motion } from "motion/react";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
+import GlowRow from "../ui/GlowRow";
 import { coursework, skills } from "../data/site";
-import { useMood, useScene } from "../scene/store";
-
-const TRAY = ["var(--pink-tint)", "var(--violet-tint)", "var(--lime-tint)", "var(--sky-tint)", "var(--butter-tint)"];
-const DOT = ["var(--pink)", "var(--violet)", "var(--lime)", "var(--sky)", "var(--butter)"];
+import { useMood } from "../scene/store";
 
 const ICONS = {
   JavaScript: "/assets/javascript.svg",
@@ -17,77 +14,89 @@ const ICONS = {
   "Git & GitHub": "/assets/github.svg",
 };
 
+/**
+ * The toolkit, with the category names promoted to display scale.
+ *
+ * Set at label size these were a spreadsheet: five grey headings and a lot of
+ * small grey text. The category is the thing worth seeing from across the
+ * room, so it gets the type, a running two-digit index, and the tools fall
+ * underneath it as a list you scan rather than a wall you read.
+ */
+function Group({ n, label, hint, items, i }) {
+  return (
+    <Reveal delay={Math.min(i, 5) * 0.05}>
+      <GlowRow className="grid gap-x-12 gap-y-6 py-10 pl-6 md:grid-cols-[1fr_1.25fr] md:py-14">
+        <div className="flex items-start gap-4">
+          <span
+            className="mt-2 font-mono text-[10px] tabular-nums tracking-[0.2em] text-inkfaint
+                       transition-colors duration-[260ms] group-hover:text-[var(--mood-solid)]"
+          >
+            {n}
+          </span>
+          <div>
+            <h3 className="display text-[clamp(1.7rem,3.6vw,2.6rem)]">{label}</h3>
+            {hint && (
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-inkfaint">
+                {hint}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <ul className="flex flex-wrap content-start items-center gap-x-6 gap-y-3 md:pt-3">
+          {items.map((item) => (
+            <li
+              key={item}
+              className="flex items-center gap-2 text-[16px] text-inksoft
+                         transition-colors duration-[200ms] hover:text-ink"
+            >
+              {ICONS[item] && (
+                <img
+                  src={ICONS[item]}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-4 w-4 object-contain opacity-50 transition-opacity
+                             duration-[200ms] hover:opacity-100"
+                />
+              )}
+              {item}
+            </li>
+          ))}
+        </ul>
+      </GlowRow>
+    </Reveal>
+  );
+}
+
 export default function Skills() {
   const ref = useMood("lime");
-  const { reduced } = useScene();
+  const groups = [
+    ...skills,
+    { label: "Studied", hint: "B.Sc. Computer Science, MUN", items: coursework },
+  ];
 
   return (
     <section id="skills" ref={ref} className="section">
       <div className="shell">
         <SectionHeading
+          index="03"
           kicker="toolkit"
           title="What I build"
           italic="with."
-          note="No progress bars — they never meant anything. Just the things I've genuinely written code in, sorted by where they live."
+          note="No progress bars — they never meant anything. Just what I've genuinely written code in."
         />
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group, gi) => (
-            <Reveal key={group.label} delay={(gi % 3) * 0.05}>
-              <div className="toy h-full p-6" style={{ background: TRAY[gi % TRAY.length] }}>
-                <div className="flex items-baseline gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ background: DOT[gi % DOT.length] }}
-                  />
-                  <h3 className="display text-[24px]">{group.label}</h3>
-                </div>
-                <p className="display-italic mt-1 text-[15px]" style={{ color: "var(--ink-soft)" }}>
-                  {group.hint}
-                </p>
-
-                <ul className="mt-6 flex flex-wrap gap-2">
-                  {group.items.map((item, i) => (
-                    <motion.li
-                      key={item}
-                      className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13.5px] font-bold"
-                      style={{
-                        background: "var(--card)",
-                        border: "1.5px solid var(--lip)",
-                        boxShadow: "0 3px 0 var(--lip)",
-                      }}
-                      whileHover={
-                        reduced ? undefined : { y: -4, rotate: i % 2 ? 3 : -3, scale: 1.04 }
-                      }
-                      transition={{ type: "spring", stiffness: 420, damping: 16 }}
-                    >
-                      {ICONS[item] && (
-                        <img src={ICONS[item]} alt="" aria-hidden="true" className="h-3.5 w-3.5 object-contain" />
-                      )}
-                      {item}
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
+        <div className="border-b border-line">
+          {groups.map((g, i) => (
+            <Group
+              key={g.label}
+              n={String(i + 1).padStart(2, "0")}
+              label={g.label}
+              hint={g.hint}
+              items={g.items}
+              i={i}
+            />
           ))}
-
-          <Reveal delay={0.1}>
-            <div className="toy h-full p-6" style={{ background: "var(--ink)", color: "var(--paper)" }}>
-              <h3 className="display text-[24px]">Studied</h3>
-              <p className="display-italic mt-1 text-[15px]" style={{ color: "rgba(251,249,245,0.6)" }}>
-                B.Sc. Computer Science, MUN
-              </p>
-              <ul className="mt-6 space-y-2.5">
-                {coursework.map((c) => (
-                  <li key={c} className="flex items-center gap-3 text-[15px] font-medium">
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--lime)" }} />
-                    {c}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
         </div>
       </div>
     </section>

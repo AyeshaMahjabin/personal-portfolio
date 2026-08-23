@@ -1,16 +1,24 @@
 import { motion } from "motion/react";
 import { useScene } from "../scene/store";
 
+/* Each project owns an accent. It is used as a light source behind the art —
+   a wash and a hairline — never as a flat fill. */
 const ART = {
-  scraper: { bg: "var(--lime)", line: "paste a link,", italic: "ask a question", foot: "answered on your own machine" },
-  kivi: { bg: "var(--sky)" },
-  portfolio: { bg: "var(--butter)" },
+  scraper: {
+    accent: "#00d9ff",
+    line: "paste a link,",
+    lead: "ask a question",
+    foot: "answered on your own machine",
+  },
+  kivi: { accent: "#b14bff" },
+  portfolio: { accent: "#ff2e88" },
 };
 
 /**
- * The lid of a project card. A real screenshot gets framed and tilted like a
- * photo dropped on the page; a project without one gets a printed poster
- * rather than a fake interface.
+ * The art for a project row. A real screenshot sits square inside a lit frame;
+ * a project without one gets a typographic plate instead of a fake interface.
+ * Nothing is tilted any more — the previous version rotated everything a
+ * couple of degrees, which was most of why the page read as a scrapbook.
  */
 export default function ProjectPoster({ project, hovered, ratio = "16/11" }) {
   const { reduced } = useScene();
@@ -18,39 +26,48 @@ export default function ProjectPoster({ project, hovered, ratio = "16/11" }) {
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-[22px]"
-      style={{ background: art.bg, border: "1.5px solid var(--lip)", aspectRatio: ratio }}
+      className="relative w-full overflow-hidden rounded-[14px]"
+      style={{
+        aspectRatio: ratio,
+        background:
+          `radial-gradient(ellipse at 20% 15%, color-mix(in srgb, ${art.accent} 34%, transparent) 0%, transparent 55%),` +
+          `radial-gradient(ellipse at 85% 100%, color-mix(in srgb, var(--violet-neon) 30%, transparent) 0%, transparent 60%),` +
+          `linear-gradient(150deg, color-mix(in srgb, ${art.accent} 14%, var(--panel)) 0%, var(--panel) 60%)`,
+        border: "1px solid var(--line)",
+        boxShadow: hovered
+          ? `inset 0 0 60px -30px ${art.accent}, 0 0 40px -22px ${art.accent}`
+          : "inset 0 0 60px -40px transparent",
+        transition: "box-shadow 260ms cubic-bezier(0.22,1,0.36,1)",
+      }}
     >
       {project.image ? (
         <motion.img
           src={project.image}
           alt={`${project.title} screenshot`}
           loading="lazy"
-          className="absolute left-1/2 top-1/2 w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-[14px] object-cover"
+          className="absolute left-1/2 top-1/2 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-[10px] object-cover"
           style={{
-            border: "1.5px solid var(--lip)",
-            boxShadow: "0 22px 40px -24px rgba(26,22,38,0.85)",
-            background: "var(--card)",
+            border: "1px solid var(--lip)",
+            boxShadow: "0 26px 50px -26px rgba(0,0,0,1)",
+            background: "var(--ground)",
             aspectRatio: "16/10",
           }}
-          animate={
-            reduced ? {} : { rotate: hovered ? -1 : -3, scale: hovered ? 1.05 : 1 }
-          }
-          transition={{ type: "spring", stiffness: 220, damping: 20 }}
+          animate={reduced ? {} : { scale: hovered ? 1.04 : 1, y: hovered ? -4 : 0 }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
         />
       ) : (
         <motion.div
           className="absolute inset-0 grid place-items-center px-8 text-center"
-          animate={reduced ? {} : { y: hovered ? -6 : 0 }}
-          transition={{ type: "spring", stiffness: 220, damping: 20 }}
+          animate={reduced ? {} : { y: hovered ? -5 : 0 }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
         >
           <div>
-            <p className="display text-[clamp(1.5rem,3vw,2.3rem)] leading-[1.06]">
+            <p className="display text-[clamp(1.4rem,2.8vw,2.1rem)] leading-[1.08]">
               {art.line}
               <br />
-              <span className="display-italic">{art.italic}</span>
+              <span style={{ color: art.accent }}>{art.lead}</span>
             </p>
-            <p className="mt-3 text-[13px] font-bold" style={{ color: "rgba(26,22,38,0.55)" }}>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.18em] text-inkfaint">
               {art.foot}
             </p>
           </div>

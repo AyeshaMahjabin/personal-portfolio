@@ -19,12 +19,12 @@ function Robot({ onReady, jumpRef }) {
     return () => first?.fadeOut(0.2);
   }, [actions, onReady]);
 
-  /* The model ships with its own holo-platform underneath. On a page made of
-     coloured paper the character reads better floating on its own circle, so
-     the platform stays hidden and the robot keeps its original materials. */
+  /* The GLB is a complete holo playground — the deck the robot stands on plus
+     the cube, pyramid, platonics, gears, helixes, tori and their scattered
+     MASH copies orbiting it, all on the one animation clip. It ships as a
+     whole scene and it reads as one; nothing here is culled. (`ground` is the
+     deck's parent, not a floor — hiding it takes the halo with it.) */
   useEffect(() => {
-    const stage = scene.getObjectByName("ground");
-    if (stage) stage.visible = false;
 
     scene.traverse((o) => {
       if (!o.isMesh || !o.material) return;
@@ -69,21 +69,49 @@ function Robot({ onReady, jumpRef }) {
 
 useGLTF.preload(MODEL);
 
+/* The canvas is drawn 35% larger than its layout box on every side. The
+   animation throws a ring and a few props well outside the robot's own
+   footprint, and at the old size they hit the edge of the drawing buffer and
+   were sliced off — which read as a hard rectangle cutting through the scene.
+   OVERDRAW is that margin; MODEL_SCALE cancels it out so the robot still
+   occupies exactly the same pixels as before, just with air around it. */
+const OVERDRAW = 0.35;
+const MODEL_SCALE = 1 / (1 + OVERDRAW * 2);
+
 /** Transparent canvas — the robot stands on the page, not inside a box. */
 export default function RobotCanvas({ onReady, jumpRef, coarse }) {
   return (
     <Canvas
       dpr={[1, coarse ? 1.3 : 1.9]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      style={{ position: "absolute", inset: 0, background: "transparent" }}
+      style={{
+        /* width/height are set explicitly rather than via `inset`: R3F's
+           wrapper carries its own width:100%;height:100%, which wins over the
+           right/bottom insets — so `inset` alone moved the box without
+           resizing it. */
+        position: "absolute",
+        left: `${-OVERDRAW * 100}%`,
+        top: `${-OVERDRAW * 100}%`,
+        width: `${(1 + OVERDRAW * 2) * 100}%`,
+        height: `${(1 + OVERDRAW * 2) * 100}%`,
+        background: "transparent",
+        /* the poke button underneath owns the clicks; without this the
+           overflowing canvas would swallow them outside the button's box */
+        pointerEvents: "none",
+      }}
     >
-      <ambientLight intensity={1.15} />
-      <hemisphereLight intensity={0.7} color="#ffffff" groundColor="#ffd9ec" />
-      <directionalLight position={[3, 6, 4]} intensity={2.1} />
-      <pointLight position={[-4, 1, 3]} intensity={26} color="#ff4fa3" />
-      <pointLight position={[4, -1, 2]} intensity={20} color="#7c5cff" />
+      {/* Dark scene, hard neon rims. Ambient stays low so the model reads as
+          lit *by the city* rather than by a studio. */}
+      <ambientLight intensity={0.35} />
+      <hemisphereLight intensity={0.4} color="#00d9ff" groundColor="#0a0611" />
+      <directionalLight position={[3, 6, 4]} intensity={0.9} color="#f0e9f7" />
+      <pointLight position={[-4, 1, 3]} intensity={45} color="#ff2e88" />
+      <pointLight position={[4, -1, 2]} intensity={34} color="#00d9ff" />
+      <pointLight position={[0, 3, -4]} intensity={26} color="#b14bff" />
       <Suspense fallback={null}>
-        <Robot onReady={onReady} jumpRef={jumpRef} />
+        <group scale={MODEL_SCALE}>
+          <Robot onReady={onReady} jumpRef={jumpRef} />
+        </group>
       </Suspense>
     </Canvas>
   );

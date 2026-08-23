@@ -1,160 +1,158 @@
-import { motion } from "motion/react";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
+import GlowRow from "../ui/GlowRow";
 import Globe from "../components/Globe";
-import Sticker from "../ui/Sticker";
-import { MOODS, useMood, useScene } from "../scene/store";
+import { bang } from "../lib/fluid";
+import { MOODS, useMood, useScene, ZONE } from "../scene/store";
 
+/* Only the three that are actually distinct — the other two mood keys are
+   aliases of these until phase four renames the call sites. */
 const SWATCHES = [
-  { key: "pink", label: "Pink" },
+  { key: "pink", label: "Magenta" },
+  { key: "sky", label: "Cyan" },
   { key: "violet", label: "Violet" },
-  { key: "lime", label: "Lime" },
-  { key: "sky", label: "Sky" },
-  { key: "butter", label: "Butter" },
 ];
 
+/** A demo row: instrument label, the thing, the controls. No box. */
+function Demo({ tag, title, children, aside, delay = 0 }) {
+  return (
+    <Reveal delay={delay}>
+      <GlowRow className="grid items-center gap-x-10 gap-y-6 py-12 pl-6 md:grid-cols-[8rem_1fr_auto]">
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-inkfaint">
+          {tag}
+        </span>
+
+        <div className="max-w-xl">
+          <h3 className="display text-[clamp(1.7rem,3.4vw,2.4rem)]">{title}</h3>
+          {children}
+        </div>
+
+        {aside && <div className="md:justify-self-end">{aside}</div>}
+      </GlowRow>
+    </Reveal>
+  );
+}
+
 export default function Playground() {
-  const ref = useMood("violet");
-  const { effects, setEffects, coarse, mood, setMood, reduced } = useScene();
+  /* LOUD: this is the one section where the fluid is meant to be the subject
+     rather than the atmosphere. */
+  const ref = useMood("violet", ZONE.LOUD);
+  const { effects, setEffects, coarse, mood, setMood } = useScene();
+
+  /* Fire a burst from wherever the button is, so the demo demonstrates itself. */
+  const makeAMess = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        bang(
+          r.left + r.width / 2 + (Math.random() - 0.5) * 260,
+          r.top + r.height / 2 + (Math.random() - 0.5) * 200
+        );
+      }, i * 70);
+    }
+  };
 
   return (
-    <section id="playground" ref={ref} className="section">
+    <section id="playground" ref={ref} className="section" data-tone="lift">
       <div className="shell">
         <SectionHeading
+          index="04"
           kicker="playground"
           title="Things I built"
           italic="for fun."
-          note="Most of these are alive on this page right now. None of them are trying to be a product — that's the whole point."
+          note="All three are alive on this page right now. None of them are trying to be a product — that's the point."
         />
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* fluid cursor -------------------------------------------- */}
-          <Reveal>
-            <div className="toy flex h-full flex-col justify-between p-7">
-              <div>
-                <span className="pill" style={{ background: "var(--pink-tint)" }}>
-                  WebGL
-                </span>
-                <h3 className="display mt-5 text-[26px]">Fluid cursor</h3>
-                <p className="lede mt-3 text-[15px]">
-                  A fluid simulation running underneath the whole page. Your cursor pushes dye
-                  through a velocity field, and it borrows its colours from whichever section
-                  you&apos;re in.
-                </p>
+        <div className="border-b border-line">
+          <Demo
+            tag="WebGL"
+            title="Fluid cursor"
+            aside={
+              <div className="flex flex-wrap gap-2.5">
+                <button
+                  onClick={makeAMess}
+                  disabled={coarse || !effects}
+                  className="btn btn-plain disabled:opacity-40"
+                >
+                  Make a mess
+                </button>
+                <button
+                  onClick={() => setEffects((v) => !v)}
+                  disabled={coarse}
+                  className="btn btn-ink disabled:opacity-40"
+                >
+                  {coarse ? "Desktop only" : effects ? "Turn it off" : "Turn it on"}
+                </button>
               </div>
-              <button
-                onClick={() => setEffects((v) => !v)}
-                disabled={coarse}
-                className="btn btn-plain mt-6 w-full disabled:opacity-45"
-              >
-                {coarse ? "desktop only, sorry" : effects ? "Turn it off" : "Turn it on"}
-              </button>
-            </div>
-          </Reveal>
+            }
+          >
+            <p className="lede mt-3 text-[15px]">
+              A Navier–Stokes simulation running underneath the whole page. Your cursor pushes dye
+              through a velocity field, and it reads its colours straight out of the site&apos;s own
+              CSS variables — so the fluid always wears whatever the current section is wearing.
+              It&apos;s turned up loudest right here.
+            </p>
+          </Demo>
 
-          {/* colour machine ------------------------------------------- */}
-          <Reveal delay={0.06}>
-            <div
-              className="toy flex h-full flex-col justify-between p-7"
-              style={{ background: "var(--mood)" }}
-            >
-              <div>
-                <span className="pill">Design system</span>
-                <h3 className="display mt-5 text-[26px]">The colour machine</h3>
-                <p className="lede mt-3 text-[15px]">
-                  Every section owns a colour, and the paper behind everything drifts to match it as
-                  you scroll. Press a swatch to move it by hand.
-                </p>
+          <Demo
+            tag="Canvas"
+            title="Where I am"
+            delay={0.06}
+            aside={
+              <div className="pointer-events-none relative w-[17rem] max-w-full md:w-[22rem]">
+                {/* a lit ring behind it, so the globe sits in the scene */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-[8%] rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(circle, color-mix(in srgb, var(--cyan) 18%, transparent) 0%, transparent 65%)",
+                    filter: "blur(20px)",
+                  }}
+                />
+                <Globe className="relative" />
               </div>
+            }
+          >
+            <p className="lede mt-3 text-[15px]">
+              St. John&apos;s: the easternmost city in North America, and half an hour out of sync
+              with the entire continent.
+            </p>
+          </Demo>
 
-              <div className="mt-6 flex gap-2.5">
+          <Demo
+            tag="Design system"
+            title="The colour machine"
+            delay={0.12}
+            aside={
+              <div className="flex items-center gap-2.5">
                 {SWATCHES.map((s) => (
-                  <motion.button
+                  <button
                     key={s.key}
                     onClick={() => setMood(s.key)}
                     aria-label={`Switch the page to ${s.label}`}
                     aria-pressed={mood === s.key}
-                    className="h-11 flex-1 rounded-full"
+                    className="h-9 w-9 rounded-md border transition-all duration-[260ms]"
                     style={{
-                      background: MOODS[s.key].solid,
-                      border: "1.5px solid var(--lip)",
-                      boxShadow: mood === s.key ? "0 2px 0 var(--lip)" : "0 5px 0 var(--lip)",
+                      background: `color-mix(in srgb, ${MOODS[s.key].solid} 22%, transparent)`,
+                      borderColor:
+                        mood === s.key
+                          ? MOODS[s.key].solid
+                          : "color-mix(in srgb, var(--ink) 14%, transparent)",
+                      boxShadow:
+                        mood === s.key ? `0 0 20px -4px ${MOODS[s.key].solid}` : "none",
                     }}
-                    animate={{ y: mood === s.key ? 3 : 0 }}
-                    whileHover={reduced ? undefined : { y: mood === s.key ? 3 : -3 }}
-                    transition={{ type: "spring", stiffness: 420, damping: 20 }}
                   />
                 ))}
               </div>
-            </div>
-          </Reveal>
-
-          {/* globe ---------------------------------------------------- */}
-          <Reveal delay={0.12}>
-            <div className="toy relative flex h-full flex-col justify-between overflow-hidden p-7">
-              <div className="relative z-10">
-                <span className="pill" style={{ background: "var(--sky-tint)" }}>
-                  Canvas
-                </span>
-                <h3 className="display mt-5 text-[26px]">Where I am</h3>
-                <p className="lede mt-3 max-w-[17rem] text-[15px]">
-                  St. John&apos;s: the easternmost city in North America, and half an hour out of
-                  sync with the entire continent.
-                </p>
-              </div>
-              <div className="pointer-events-none relative mx-auto mt-5 w-[78%] max-w-[13rem]">
-                <Globe />
-              </div>
-            </div>
-          </Reveal>
-
-          {/* the robot ------------------------------------------------- */}
-          <Reveal delay={0.06} className="md:col-span-2">
-            <div
-              className="toy flex h-full flex-col items-start justify-between gap-6 p-7 sm:flex-row sm:items-center"
-              style={{ background: "var(--lime)" }}
-            >
-              <div>
-                <span className="pill">3D</span>
-                <h3 className="display mt-5 text-[26px]">The robot upstairs</h3>
-                <p className="mt-3 max-w-lg text-[15px] leading-relaxed" style={{ color: "rgba(26,22,38,0.75)" }}>
-                  A glTF character rendered with react-three-fiber, standing right on the page with
-                  no frame around it. It follows your cursor and jumps when you poke it — three.js
-                  only downloads once it&apos;s near the screen.
-                </p>
-                <a href="#home" className="btn btn-ink mt-6">
-                  Go poke it
-                </a>
-              </div>
-
-              <div className="shrink-0 pr-2">
-                <Sticker rotate={8} color="var(--card)" size={110} label="Drag me">
-                  <span className="display text-[19px] leading-tight">
-                    drag
-                    <br />
-                    me
-                  </span>
-                </Sticker>
-              </div>
-            </div>
-          </Reveal>
-
-          {/* next ------------------------------------------------------ */}
-          <Reveal delay={0.12}>
-            <div
-              className="flex h-full min-h-[15rem] flex-col justify-between rounded-[28px] p-7"
-              style={{ border: "2px dashed var(--lip)" }}
-            >
-              <span className="pill">In progress</span>
-              <div>
-                <h3 className="display text-[26px]">Whatever&apos;s next</h3>
-                <p className="lede mt-3 text-[15px]">
-                  Reserved space: creative coding, small tools, 3D printing, half-formed ideas that
-                  turn out to be worth finishing.
-                </p>
-              </div>
-            </div>
-          </Reveal>
+            }
+          >
+            <p className="lede mt-3 text-[15px]">
+              Every section owns an accent, and the ground behind the page drifts toward it as you
+              scroll. Override it by hand and the whole site follows — including the dye in the
+              fluid.
+            </p>
+          </Demo>
         </div>
       </div>
     </section>

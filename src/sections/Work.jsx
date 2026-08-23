@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
@@ -7,81 +7,102 @@ import CaseStudy from "../components/CaseStudy";
 import { useMood, useScene } from "../scene/store";
 import { projects } from "../data/site";
 
-const TILT = [-1.2, 1.4, -0.8];
-
-function ProjectCard({ project, index, featured, onOpen }) {
+/**
+ * Projects as alternating asymmetric spreads.
+ *
+ * Three identical rows in a stack read as a table of contents no matter how
+ * nicely they are set. Alternating the side the art lands on gives the section
+ * a rhythm you feel while scrolling, and letting the index numeral run at
+ * display scale — breaking out over the art rather than sitting politely
+ * beside it — gives each project a landmark of its own.
+ */
+function Project({ project, index, onOpen }) {
   const [hovered, setHovered] = useState(false);
   const { reduced } = useScene();
-
-  const meta = (
-    <div className={featured ? "flex h-full flex-col justify-center px-2 py-4 sm:px-6" : "px-2 pb-1 pt-5"}>
-      <p className="text-[13px] font-bold" style={{ color: "var(--ink-soft)" }}>
-        {project.index} · {project.kind} · {project.period}
-      </p>
-
-      <h3
-        className={`display mt-2 ${
-          featured ? "text-[clamp(2rem,4vw,3rem)]" : "text-[clamp(1.6rem,3vw,2.1rem)]"
-        }`}
-      >
-        {project.title}
-      </h3>
-
-      <p className="mt-3 max-w-md text-[16px]" style={{ color: "var(--ink-soft)" }}>
-        {project.subtitle}
-      </p>
-
-      <div className="mt-5 flex flex-wrap gap-1.5">
-        {project.stack.slice(0, featured ? 5 : 4).map((s) => (
-          <span
-            key={s}
-            className="rounded-full px-3 py-1 text-[12px] font-bold"
-            style={{ background: "var(--mood)", color: "var(--ink)" }}
-          >
-            {s}
-          </span>
-        ))}
-      </div>
-
-      <span className="mt-7 flex items-center gap-3 text-[15px] font-bold">
-        Read the case study
-        <motion.span
-          className="grid h-10 w-10 place-items-center rounded-full text-[17px]"
-          style={{ background: "var(--ink)", color: "var(--paper)" }}
-          animate={reduced ? {} : { rotate: hovered ? 45 : 0, scale: hovered ? 1.1 : 1 }}
-          transition={{ type: "spring", stiffness: 320, damping: 18 }}
-        >
-          ↗
-        </motion.span>
-      </span>
-    </div>
-  );
+  const flip = index % 2 === 1;
 
   return (
-    <Reveal delay={index * 0.06}>
+    <Reveal delay={0.04}>
       <motion.button
         onClick={() => onOpen(project)}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
         data-touchable
-        className="toy toy-press block w-full p-4 text-left sm:p-5"
-        style={{ rotate: `${TILT[index % TILT.length]}deg` }}
-        whileHover={reduced ? undefined : { rotate: 0, y: -8 }}
-        whileTap={reduced ? undefined : { scale: 0.985, y: 2 }}
-        transition={{ type: "spring", stiffness: 300, damping: 22 }}
+        className="group relative block w-full py-16 text-left md:py-24"
         aria-label={`Open the ${project.title} case study`}
       >
-        {featured ? (
-          <div className="grid items-stretch gap-4 md:grid-cols-[1.15fr_0.85fr]">
-            <ProjectPoster project={project} hovered={hovered} ratio="16/10" />
-            {meta}
+        <div className="grid items-center gap-12 md:gap-16 lg:grid-cols-2">
+          {/* art */}
+          <div className={`relative ${flip ? "lg:order-2" : "lg:order-1"}`}>
+            <motion.div
+              animate={reduced ? {} : { y: hovered ? -6 : 0 }}
+              transition={{ type: "spring", stiffness: 220, damping: 24 }}
+            >
+              <ProjectPoster project={project} hovered={hovered} ratio="4/3" />
+            </motion.div>
+
+            {/* the numeral, breaking out over the art */}
+            <span
+              aria-hidden="true"
+              className="display pointer-events-none absolute select-none leading-none"
+              style={{
+                fontSize: "clamp(4.5rem,11vw,9rem)",
+                [flip ? "right" : "left"]: "-0.05em",
+                bottom: "-0.26em",
+                color: "var(--ground)",
+                WebkitTextStroke: "1.5px var(--mood-solid)",
+              }}
+            >
+              {project.index}
+            </span>
           </div>
-        ) : (
-          <>
-            <ProjectPoster project={project} hovered={hovered} />
-            {meta}
-          </>
-        )}
+
+          {/* type */}
+          <div className={`min-w-0 ${flip ? "lg:order-1 lg:pr-8" : "lg:order-2 lg:pl-8"}`}>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.24em] text-inkfaint">
+              <span style={{ color: "var(--mood-solid)" }}>{project.kind}</span>
+              <span>/</span>
+              <span>{project.period}</span>
+            </div>
+
+            <h3 className="display mt-5 text-[clamp(2.2rem,5.4vw,3.8rem)]">
+              {project.title}
+            </h3>
+
+            <p className="lede mt-5 max-w-md text-[17px]">{project.subtitle}</p>
+
+            <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2">
+              {project.stack.slice(0, 5).map((t) => (
+                <li
+                  key={t}
+                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-inkfaint
+                             transition-colors duration-[260ms] group-hover:text-inksoft"
+                >
+                  {t}
+                </li>
+              ))}
+            </ul>
+
+            <span className="mt-10 inline-flex items-center gap-3 text-[15px] font-semibold">
+              <span
+                className="relative after:absolute after:-bottom-1 after:left-0 after:h-px
+                           after:w-full after:origin-left after:scale-x-0 after:bg-[var(--mood-solid)]
+                           after:transition-transform after:duration-[420ms]
+                           after:ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:after:scale-x-100"
+              >
+                Read the case study
+              </span>
+              <motion.span
+                aria-hidden="true"
+                animate={reduced ? {} : { x: hovered ? 8 : 0 }}
+                transition={{ type: "spring", stiffness: 320, damping: 20 }}
+                style={{ color: "var(--mood-solid)" }}
+              >
+                →
+              </motion.span>
+            </span>
+          </div>
+        </div>
       </motion.button>
     </Reveal>
   );
@@ -91,21 +112,30 @@ export default function Work() {
   const ref = useMood("violet");
   const [open, setOpen] = useState(null);
 
+  /* the command palette can open a case study from anywhere on the page */
+  useEffect(() => {
+    const onOpen = (e) => {
+      const p = projects.find((x) => x.id === e.detail);
+      if (p) setTimeout(() => setOpen(p), 420);
+    };
+    window.addEventListener("case:open", onOpen);
+    return () => window.removeEventListener("case:open", onOpen);
+  }, []);
+
   return (
     <section id="work" ref={ref} className="section">
       <div className="shell">
         <SectionHeading
+          index="01"
           kicker="the work"
           title="Three things I"
           italic="actually built."
-          note="What it is, why it exists, what I owned, and the part that turned out to be harder than it looked. Open one."
+          note="What it is, what I owned, and the part that turned out to be harder than it looked."
         />
 
-        <div className="grid gap-7 md:grid-cols-2">
+        <div className="divide-y divide-[var(--line)]">
           {projects.map((p, i) => (
-            <div key={p.id} className={i === 0 ? "md:col-span-2" : ""}>
-              <ProjectCard project={p} index={i} featured={i === 0} onOpen={setOpen} />
-            </div>
+            <Project key={p.id} project={p} index={i} onOpen={setOpen} />
           ))}
         </div>
       </div>
