@@ -13,7 +13,8 @@ function SplashCursor({
   SPLAT_RADIUS = 0.35,
   SPLAT_FORCE = 8000,
   SHADING = true,
-  COLOR_UPDATE_SPEED = 10,
+  COLOR_UPDATE_SPEED = 6,
+  DYE_GAIN = 0.42,
   BACK_COLOR = { r: 0.5, g: 0, b: 0 },
   TRANSPARENT = true
 }) {
@@ -22,6 +23,13 @@ function SplashCursor({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    let rafId = 0;
+    const bound = [];
+    const on = (target, type, fn, opts) => {
+      target.addEventListener(type, fn, opts);
+      bound.push(() => target.removeEventListener(type, fn, opts));
+    };
 
     function pointerPrototype() {
       this.id = -1;
@@ -49,6 +57,7 @@ function SplashCursor({
       SPLAT_FORCE,
       SHADING,
       COLOR_UPDATE_SPEED,
+      DYE_GAIN,
       PAUSED: false,
       BACK_COLOR,
       TRANSPARENT,
@@ -759,7 +768,7 @@ function SplashCursor({
       applyInputs();
       step(dt);
       render(null);
-      requestAnimationFrame(updateFrame);
+      rafId = requestAnimationFrame(updateFrame);
     }
 
     function calcDeltaTime() {
@@ -932,9 +941,9 @@ function SplashCursor({
 
     function clickSplat(pointer) {
       const color = generateColor();
-      color.r *= 10.0;
-      color.g *= 10.0;
-      color.b *= 10.0;
+      color.r *= 4.5;
+      color.g *= 4.5;
+      color.b *= 4.5;
       let dx = 10 * (Math.random() - 0.5);
       let dy = 30 * (Math.random() - 0.5);
       splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color);
@@ -1008,12 +1017,50 @@ function SplashCursor({
       return delta;
     }
 
+    /* The dye is not random: it is pulled from the live palette variables, so
+       the fluid is always wearing whatever colours the current time of day is
+       wearing. Read once every few seconds rather than per splat. */
+    let paletteCache = null;
+    let paletteReadAt = 0;
+
+    function readPalette() {
+      const now = Date.now();
+      if (paletteCache && now - paletteReadAt < 2000) return paletteCache;
+      paletteReadAt = now;
+      const cs = getComputedStyle(document.documentElement);
+      const parse = (name, fallback) => {
+        const raw = cs.getPropertyValue(name).trim();
+        if (raw.startsWith('#')) {
+          const h = raw.slice(1);
+          const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+          const n = parseInt(full, 16);
+          if (Number.isNaN(n)) return fallback;
+          return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+        }
+        const m = raw.match(/-?\d+(\.\d+)?/g);
+        if (!m || m.length < 3) return fallback;
+        return [+m[0] / 255, +m[1] / 255, +m[2] / 255];
+      };
+      paletteCache = [
+        parse("--pink", [1, 0.31, 0.64]),
+        parse("--violet", [0.49, 0.36, 1]),
+        parse("--lime", [0.72, 0.94, 0.18]),
+        parse("--butter", [1, 0.85, 0.3]),
+      ];
+      return paletteCache;
+    }
+
     function generateColor() {
-      let c = HSVtoRGB(Math.random(), 1.0, 1.0);
-      c.r *= 0.15;
-      c.g *= 0.15;
-      c.b *= 0.15;
-      return c;
+      const palette = readPalette();
+      const a = palette[(Math.random() * palette.length) | 0];
+      const b = palette[(Math.random() * palette.length) | 0];
+      const m = Math.random();
+      const gain = config.DYE_GAIN;
+      return {
+        r: (a[0] + (b[0] - a[0]) * m) * gain,
+        g: (a[1] + (b[1] - a[1]) * m) * gain,
+        b: (a[2] + (b[2] - a[2]) * m) * gain,
+      };
     }
 
     function HSVtoRGB(h, s, v) {
@@ -1091,7 +1138,7 @@ function SplashCursor({
       return hash;
     }
 
-    window.addEventListener('mousedown', (e) => {
+    on(window, 'mousedown', (e) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
@@ -1099,37 +1146,23 @@ function SplashCursor({
       clickSplat(pointer);
     });
 
-    document.body.addEventListener('mousemove', function handleFirstMouseMove(e) {
+    on(document.body, 'mousemove', function handleFirstMouseMove(e) {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
       let color = generateColor();
-      updateFrame();
       updatePointerMoveData(pointer, posX, posY, color);
       document.body.removeEventListener('mousemove', handleFirstMouseMove);
     });
 
-    window.addEventListener('mousemove', (e) => {
+    on(window, 'mousemove', (e) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
-      let color = pointer.color;
-      updatePointerMoveData(pointer, posX, posY, color);
+      updatePointerMoveData(pointer, posX, posY, pointer.color);
     });
 
-    document.body.addEventListener('touchstart', function handleFirstTouchStart(e) {
-      const touches = e.targetTouches;
-      let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        let posX = scaleByPixelRatio(touches[i].clientX);
-        let posY = scaleByPixelRatio(touches[i].clientY);
-        updateFrame();
-        updatePointerDownData(pointer, touches[i].identifier, posX, posY);
-      }
-      document.body.removeEventListener('touchstart', handleFirstTouchStart);
-    });
-
-    window.addEventListener('touchstart', (e) => {
+    on(window, 'touchstart', (e) => {
       const touches = e.targetTouches;
       let pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
@@ -1137,31 +1170,44 @@ function SplashCursor({
         let posY = scaleByPixelRatio(touches[i].clientY);
         updatePointerDownData(pointer, touches[i].identifier, posX, posY);
       }
-    });
+    }, { passive: true });
 
-    window.addEventListener(
-      'touchmove',
-      (e) => {
-        const touches = e.targetTouches;
-        let pointer = pointers[0];
-        for (let i = 0; i < touches.length; i++) {
-          let posX = scaleByPixelRatio(touches[i].clientX);
-          let posY = scaleByPixelRatio(touches[i].clientY);
-          updatePointerMoveData(pointer, posX, posY, pointer.color);
-        }
-      },
-      false
-    );
+    on(window, 'touchmove', (e) => {
+      const touches = e.targetTouches;
+      let pointer = pointers[0];
+      for (let i = 0; i < touches.length; i++) {
+        let posX = scaleByPixelRatio(touches[i].clientX);
+        let posY = scaleByPixelRatio(touches[i].clientY);
+        updatePointerMoveData(pointer, posX, posY, pointer.color);
+      }
+    }, { passive: true });
 
-    window.addEventListener('touchend', (e) => {
+    on(window, 'touchend', (e) => {
       const touches = e.changedTouches;
       let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        updatePointerUpData(pointer);
+      for (let i = 0; i < touches.length; i++) updatePointerUpData(pointer);
+    });
+
+    /* Pause the simulation whenever the tab is hidden or the whole thing has
+       scrolled out of relevance - no reason to burn a GPU on a background tab. */
+    on(document, 'visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      } else if (!rafId) {
+        lastUpdateTime = Date.now();
+        updateFrame();
       }
     });
 
     updateFrame();
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      bound.forEach((off) => off());
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     SIM_RESOLUTION,
@@ -1176,6 +1222,7 @@ function SplashCursor({
     SPLAT_FORCE,
     SHADING,
     COLOR_UPDATE_SPEED,
+    DYE_GAIN,
     BACK_COLOR,
     TRANSPARENT,
   ]);
@@ -1186,7 +1233,7 @@ function SplashCursor({
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 50,
+        zIndex: 0,
         pointerEvents: 'none',
         width: '100%',
         height: '100%',

@@ -1,31 +1,73 @@
-import React from 'react'
-import SplashCursor from './components/SplashCursor';
-import Navbar from './sections/Navbar';
+import { SceneProvider } from "./scene/Provider";
+import { useScene } from "./scene/store";
+import Paper from "./scene/Paper";
+import FluidCursor from "./scene/FluidCursor";
+import BlobCursor from "./scene/BlobCursor";
+import Toasts from "./scene/Toasts";
+import Confetti from "./scene/Confetti";
+import Boundary from "./ui/Boundary";
+import Marquee from "./ui/Marquee";
+import Navbar from "./sections/Navbar";
 import Hero from "./sections/Hero";
+import Work from "./sections/Work";
+import Experience from "./sections/Experience";
+import Mindset from "./sections/Mindset";
+import Skills from "./sections/Skills";
+import Playground from "./sections/Playground";
 import About from "./sections/About";
-import Projects from "./sections/Projects";
 import Contact from "./sections/Contact";
-const App = () => {
+import Footer from "./sections/Footer";
+
+function Site() {
+  const { effects, coarse } = useScene();
+  const playful = effects && !coarse;
+
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#3b3349] via-[#0c0824] to-[#520d87]">
-      
+    <>
+      <Paper />
+      {playful && (
+        <Boundary>
+          <FluidCursor />
+        </Boundary>
+      )}
+      {playful && <BlobCursor />}
 
-    <SplashCursor/>
-    <Navbar/>
-    <Hero/>
-    <About/>
-    <Projects/>
-    <Contact/>
-    
-    
-    
-    <footer className="text-center text-gray-400 text-sm p-4">
-      © {new Date().getFullYear()} Ayesha Mahjabin Nishat. All rights reserved.
-    </footer>
-    
-    
-    </div>
+      <Navbar />
+
+      <main className="relative z-[1]">
+        <Hero />
+        <Marquee
+          items={["frontend", "backend", "playwright", "react", "python", "curiosity"]}
+          color="var(--ink)"
+          ink="var(--paper)"
+          tilt={-1.6}
+        />
+        <Work />
+        <Experience />
+        <Mindset />
+        <Marquee
+          items={["build", "break", "debug", "learn", "repeat"]}
+          color="var(--lime)"
+          ink="var(--ink)"
+          tilt={1.4}
+        />
+        <Skills />
+        <Playground />
+        <About />
+        <Contact />
+        <Footer />
+      </main>
+
+      <Toasts />
+      <Confetti />
+    </>
   );
-};
+}
 
-export default App;
+export default function App() {
+  return (
+    <SceneProvider>
+      <Site />
+    </SceneProvider>
+  );
+}

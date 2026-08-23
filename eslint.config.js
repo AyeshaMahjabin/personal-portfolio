@@ -23,7 +23,12 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // No eslint-plugin-react here, so identifiers only referenced inside JSX
+      // (motion.div, AnimatePresence, ...) read as unused. Allow them.
+      'no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^([A-Z_]|motion$)', args: 'after-used' },
+      ],
     },
   },
 ])
