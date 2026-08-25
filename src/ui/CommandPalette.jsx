@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { bang } from "../lib/fluid";
+import { copyText } from "../lib/clipboard";
 import { useScene } from "../scene/store";
 import { links, profile, projects } from "../data/site";
 
@@ -62,20 +62,6 @@ export default function CommandPalette() {
         hint: effects ? "on" : "off",
         run: () => setEffects((v) => !v),
       },
-      {
-        id: "mess",
-        group: "Switches",
-        label: "Make a mess",
-        hint: "burst",
-        run: () => {
-          for (let i = 0; i < 6; i++) {
-            setTimeout(
-              () => bang(Math.random() * innerWidth, Math.random() * innerHeight),
-              i * 80
-            );
-          }
-        },
-      },
       ...[
         ["pink", "Magenta"],
         ["sky", "Cyan"],
@@ -94,8 +80,12 @@ export default function CommandPalette() {
         label: "Copy email",
         hint: profile.email,
         run: async () => {
-          await navigator.clipboard?.writeText(profile.email);
-          toast?.({ title: "Copied", body: profile.email, emoji: "✦" });
+          const ok = await copyText(profile.email);
+          toast?.(
+            ok
+              ? { title: "Copied", body: profile.email, emoji: "✦" }
+              : { title: profile.email, body: "Copy it from the contact section." }
+          );
         },
       },
       { id: "resume", group: "Links", label: "Résumé", hint: "pdf", run: () => window.open(links.resume, "_blank") },

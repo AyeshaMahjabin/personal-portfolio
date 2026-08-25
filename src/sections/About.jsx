@@ -18,9 +18,9 @@ export default function About() {
         <SectionHeading
           index="05"
           kicker="about"
-          title="The person"
-          italic="behind it."
-          note="Short version: I like making things, and I like knowing why they work."
+          title="A bit"
+          italic="about me."
+          note="Where I am, what I'm studying, and what I'm working on."
         />
 
         <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
@@ -65,7 +65,7 @@ export default function About() {
                 >
                   <motion.img
                     src="/assets/coding-pov.png"
-                    alt="A desk, a laptop, and far too many open tabs"
+                    alt="My desk — laptop, second monitor, and the editor open"
                     loading="lazy"
                     className="absolute inset-0 h-[110%] w-full object-cover"
                     style={{ y: reduced ? 0 : y }}

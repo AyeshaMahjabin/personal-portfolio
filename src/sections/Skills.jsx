@@ -83,7 +83,7 @@ export default function Skills() {
           kicker="toolkit"
           title="What I build"
           italic="with."
-          note="No progress bars — they never meant anything. Just what I've genuinely written code in."
+          note="Only things I've written real code in, at work or in a project."
         />
 
         <div className="border-b border-line">

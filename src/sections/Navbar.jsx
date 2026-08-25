@@ -99,7 +99,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             <button onClick={() => go("contact")} className="btn btn-ink !px-5 !py-2.5 !text-[14px]">
-              Say hi
+              Contact
             </button>
 
             <button

@@ -4,6 +4,7 @@ import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
 import Magnetic from "../ui/Magnetic";
 import { bang } from "../lib/fluid";
+import { copyText } from "../lib/clipboard";
 import { useMood, useScene, ZONE } from "../scene/store";
 import { links, profile } from "../data/site";
 
@@ -28,15 +29,16 @@ export default function Contact() {
   const [copied, setCopied] = useState(false);
 
   const copy = async (e) => {
-    try {
-      await navigator.clipboard.writeText(profile.email);
+    const r = e.currentTarget.getBoundingClientRect();
+    const ok = await copyText(profile.email);
+
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
-      const r = e.currentTarget.getBoundingClientRect();
       bang(r.left + r.width / 2, r.top + r.height / 2);
       toast?.({ title: "Copied", body: profile.email, emoji: "✦" });
-    } catch {
-      toast?.({ title: profile.email, body: "Copy it by hand — clipboard said no." });
+    } else {
+      toast?.({ title: profile.email, body: "Select and copy the address above." });
     }
   };
 
@@ -46,9 +48,9 @@ export default function Contact() {
         <SectionHeading
           index="06"
           kicker="contact"
-          title="Got something"
-          italic="worth building?"
-          note="I'm looking for software engineering roles where I get to keep growing across the stack. Internships, new-grad roles, or a project that sounds interesting."
+          title="Get in"
+          italic="touch."
+          note="Open to new-grad and internship software roles for 2027. Email is the fastest way to reach me."
         />
 
         {/* the address, as the largest object on the page */}

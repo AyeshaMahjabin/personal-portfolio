@@ -23,9 +23,9 @@ import Footer from "./sections/Footer";
 const STATUS = [
   "st. john's · nl",
   "utc−03:30",
-  "react · three.js · playwright",
-  "open to 2026 roles",
-  "built in the open",
+  "react · typescript · mongodb · playwright",
+  "open to 2027 roles",
+  "cs @ memorial university",
 ];
 
 function Site() {

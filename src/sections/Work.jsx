@@ -128,9 +128,9 @@ export default function Work() {
         <SectionHeading
           index="01"
           kicker="the work"
-          title="Three things I"
-          italic="actually built."
-          note="What it is, what I owned, and the part that turned out to be harder than it looked."
+          title="Selected"
+          italic="projects."
+          note="What each one does, what I built, and the part that was hard."
         />
 
         <div className="divide-y divide-[var(--line)]">

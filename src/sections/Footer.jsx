@@ -61,7 +61,7 @@ export default function Footer() {
               © {new Date().getFullYear()} {profile.name}
             </p>
             <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-inkfaint">
-              Built in St. John&apos;s, mostly at night
+              React · Vite · Tailwind · three.js
             </p>
           </div>
         </div>

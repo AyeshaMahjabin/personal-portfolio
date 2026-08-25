@@ -2,7 +2,6 @@ import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
 import GlowRow from "../ui/GlowRow";
 import Globe from "../components/Globe";
-import { bang } from "../lib/fluid";
 import { MOODS, useMood, useScene, ZONE } from "../scene/store";
 
 /* Only the three that are actually distinct — the other two mood keys are
@@ -39,19 +38,6 @@ export default function Playground() {
   const ref = useMood("violet", ZONE.LOUD);
   const { effects, setEffects, coarse, mood, setMood } = useScene();
 
-  /* Fire a burst from wherever the button is, so the demo demonstrates itself. */
-  const makeAMess = (e) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        bang(
-          r.left + r.width / 2 + (Math.random() - 0.5) * 260,
-          r.top + r.height / 2 + (Math.random() - 0.5) * 200
-        );
-      }, i * 70);
-    }
-  };
-
   return (
     <section id="playground" ref={ref} className="section" data-tone="lift">
       <div className="shell">
@@ -60,7 +46,7 @@ export default function Playground() {
           kicker="playground"
           title="Things I built"
           italic="for fun."
-          note="All three are alive on this page right now. None of them are trying to be a product — that's the point."
+          note="All three are running on this page right now. Try them."
         />
 
         <div className="border-b border-line">
@@ -68,29 +54,19 @@ export default function Playground() {
             tag="WebGL"
             title="Fluid cursor"
             aside={
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  onClick={makeAMess}
-                  disabled={coarse || !effects}
-                  className="btn btn-plain disabled:opacity-40"
-                >
-                  Make a mess
-                </button>
-                <button
-                  onClick={() => setEffects((v) => !v)}
-                  disabled={coarse}
-                  className="btn btn-ink disabled:opacity-40"
-                >
-                  {coarse ? "Desktop only" : effects ? "Turn it off" : "Turn it on"}
-                </button>
-              </div>
+              <button
+                onClick={() => setEffects((v) => !v)}
+                disabled={coarse}
+                className="btn btn-ink disabled:opacity-40"
+              >
+                {coarse ? "Desktop only" : effects ? "Turn it off" : "Turn it on"}
+              </button>
             }
           >
             <p className="lede mt-3 text-[15px]">
-              A Navier–Stokes simulation running underneath the whole page. Your cursor pushes dye
-              through a velocity field, and it reads its colours straight out of the site&apos;s own
-              CSS variables — so the fluid always wears whatever the current section is wearing.
-              It&apos;s turned up loudest right here.
+              A Navier–Stokes fluid simulation on a WebGL canvas behind the page. The cursor pushes
+              dye through a velocity field, and the shader reads its colours from the site&apos;s CSS
+              variables, so the fluid tracks the current section. Turned up highest in this section.
             </p>
           </Demo>
 
@@ -115,8 +91,8 @@ export default function Playground() {
             }
           >
             <p className="lede mt-3 text-[15px]">
-              St. John&apos;s: the easternmost city in North America, and half an hour out of sync
-              with the entire continent.
+              A globe drawn to a canvas with a marker on St. John&apos;s — easternmost city in North
+              America, and on a timezone half an hour off the rest of the continent.
             </p>
           </Demo>
 
@@ -148,9 +124,8 @@ export default function Playground() {
             }
           >
             <p className="lede mt-3 text-[15px]">
-              Every section owns an accent, and the ground behind the page drifts toward it as you
-              scroll. Override it by hand and the whole site follows — including the dye in the
-              fluid.
+              Every section owns an accent colour, and the background drifts toward it as you scroll.
+              Set it by hand here and the rest of the site follows, fluid cursor included.
             </p>
           </Demo>
         </div>

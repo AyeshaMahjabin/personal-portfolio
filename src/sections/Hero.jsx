@@ -41,7 +41,7 @@ export default function Hero() {
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
             />
             <ScrambleText
-              text="available — 2026"
+              text="available — 2027"
               className="font-mono text-[11px] uppercase tracking-[0.24em] text-inksoft"
             />
           </motion.div>
@@ -73,8 +73,8 @@ export default function Hero() {
           </motion.div>
 
           <motion.p {...rise(0.2)} className="lede mt-8 max-w-[27rem] text-[17px]">
-            Frontend features inside a production codebase. Backend when it&apos;s needed.
-            Playwright, and the debugging in between.
+            Computer Science student at Memorial University, currently a software development
+            intern at Final POS.
           </motion.p>
 
           <motion.div {...rise(0.26)} className="mt-10 flex flex-wrap items-center gap-3">

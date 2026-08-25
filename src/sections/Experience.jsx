@@ -20,9 +20,9 @@ export default function Experience() {
         <SectionHeading
           index="02"
           kicker="work experience"
-          title="Inside a"
-          italic="real codebase."
-          note="One internship, five surfaces. Press a key to see what each part of the job actually involved."
+          title="Where I've"
+          italic="worked."
+          note="One internship, five parts of the job. Pick a tab for what each involved."
         />
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -56,7 +56,7 @@ export default function Experience() {
               <p className="lede text-[16px]">{experience.intro}</p>
 
               <ul className="mt-7 flex flex-wrap gap-1.5">
-                {["Production codebase", "Playwright", "Automated tests", "Debugging", "CI", "Team process"].map(
+                {["Production codebase", "Full stack", "TypeScript", "MongoDB", "REST APIs", "Playwright", "CI", "Jira"].map(
                   (t) => (
                     <li
                       key={t}
