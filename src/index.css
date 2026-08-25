@@ -1,138 +1,456 @@
-@import url("https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500;700&display=swap");
 @import "tailwindcss";
+
+/* ==================================================================
+   MAGENTA CIRCUIT
+   Near-black ground. Neon is a light source, never a fill: it is a
+   hairline, a glow behind glass, a rim on a 3D edge. Nothing large is
+   ever painted neon. Type is one tight geometric display plus one mono
+   used only for instrument labels. Nothing is tilted; everything sits
+   on the grid. Precision is the aesthetic.
+   ==================================================================*/
+
+:root {
+  /* ---- ground ------------------------------------------------- */
+  --ground: #0a0611;
+  --ground-lift: #0e0918;
+  --panel: #140c1e;
+  --panel-hi: #1b1128;
+
+  /* Legacy names kept, values inverted. --paper was the light ground
+     and --ink the dark type; on a dark site those two swap roles and
+     every existing `background: var(--paper)` / `color: var(--ink)`
+     pair keeps meaning exactly what it meant before. */
+  --paper: #0a0611;
+  --paper-warm: #0e0918;
+  --card: #140c1e;
+  --ink: #f0e9f7;
+  --ink-soft: #a79cb8;
+  --ink-faint: #6e6484;
+
+  /* ---- neon --------------------------------------------------- */
+  --magenta: #ff2e88;
+  --cyan: #00d9ff;
+  --violet-neon: #b14bff;
+  --chrome: #c8cbd9;
+
+  /* the five old accents collapsed onto the three real ones */
+  --pink: #ff2e88;
+  --sky: #00d9ff;
+  --violet: #b14bff;
+  --lime: #00d9ff;
+  --butter: #c8cbd9;
+  --c-mint: #00d9ff;
+
+  /* tints are translucent now — they sit *over* the dark ground
+     instead of being pale opaque paper */
+  --pink-tint: rgba(255, 46, 136, 0.12);
+  --violet-tint: rgba(177, 75, 255, 0.12);
+  --lime-tint: rgba(0, 217, 255, 0.1);
+  --sky-tint: rgba(0, 217, 255, 0.1);
+  --butter-tint: rgba(200, 203, 217, 0.1);
+
+  /* the section accent currently in view — animated, not jumpy */
+  --mood: rgba(0, 217, 255, 0.1);
+  --mood-solid: #00d9ff;
+  --mood-counter: #b14bff;
+
+  /* ---- structure ---------------------------------------------- */
+  --line: rgba(240, 233, 247, 0.09);
+  --lip: rgba(240, 233, 247, 0.14);
+  --glass: rgba(240, 233, 247, 0.045);
+  --scrim: rgba(6, 3, 12, 0.72);
+
+  /* tight radii. instrument panel, not candy */
+  --r-xl: 18px;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 6px;
+
+  --shadow-soft: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  --shadow-lift: 0 26px 60px -28px rgba(0, 0, 0, 1);
+
+  /* ---- one motion system -------------------------------------- */
+  /* every moving thing on this site uses these two values, so a card,
+     a button and the cat all behave like the same material */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 260ms;
+  --dur-fast: 160ms;
+}
+
 @theme {
-  --color-primary: #030412;
-  --color-midnight: #06091f;
-  --color-navy: #161a31;
-  --color-indigo: #1f1e39;
-  --color-storm: #282b4b;
-  --color-aqua: #33c2cc;
-  --color-mint: #57db96;
-  --color-royal: #5c33cc;
-  --color-lavender: #7a57db;
-  --color-fuchsia: #ca2f8c;
-  --color-orange: #cc6033;
-  --color-sand: #d6995c;
-  --color-coral: #ea4884;
-  --animate-orbit: orbit 50s linear infinite;
-  @keyframes orbit {
-    0% {
-      transform: rotate(calc(var(--angle) * 1deg))
-        translateY(calc(var(--radius) * 1px)) rotate(calc(var(--angle) * -1deg));
-    }
-    100% {
-      transform: rotate(calc(var(--angle) * 1deg + 360deg))
-        translateY(calc(var(--radius) * 1px))
-        rotate(calc((var(--angle) * -1deg) - 360deg));
-    }
-  }
-  --animate-marquee: marquee 50s linear infinite;
-  --animate-marquee-vertical: marquee-vertical 50s linear infinite;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ground: #0a0611;
+  --color-groundlift: #0e0918;
+  --color-panel: #140c1e;
+  --color-panelhi: #1b1128;
+  --color-paper: #0a0611;
+  --color-card: #140c1e;
+  --color-ink: #f0e9f7;
+  --color-inksoft: #a79cb8;
+  --color-inkfaint: #6e6484;
+  --color-line: rgba(240, 233, 247, 0.09);
+  --color-lip: rgba(240, 233, 247, 0.14);
+  --color-glass: rgba(240, 233, 247, 0.045);
+  --color-magenta: #ff2e88;
+  --color-cyan: #00d9ff;
+  --color-violetneon: #b14bff;
+  --color-chrome: #c8cbd9;
+  --color-pink: #ff2e88;
+  --color-sky: #00d9ff;
+  --color-violet: #b14bff;
+  --color-lime: #00d9ff;
+  --color-butter: #c8cbd9;
+
+  --animate-marquee: marquee 60s linear infinite;
+  --animate-bob: bob 7s ease-in-out infinite;
+  --animate-scan: scan 7s linear infinite;
+  --animate-flicker: flicker 4.5s steps(1, end) infinite;
 
   @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - var(--gap)));
-    }
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
-
-  @keyframes marquee-vertical {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(calc(-100% - var(--gap)));
-    }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes scan {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(100vh); }
+  }
+  @keyframes flicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.4; }
+    98% { opacity: 1; }
+    99% { opacity: 0.7; }
   }
 }
-body {
-  background: #01031c;
-  font-family: "Funnel Display", sans-serif;
-  color: white;
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: var(--ground);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--ink);
   overflow-x: hidden;
+  /* Deliberately NO background here. `html` already paints the ground, and a
+     root background propagates to the canvas. Setting it on <body> as well
+     made body's background a normal in-flow block background — which paints
+     *after* negative z-index descendants — so every fixed background layer
+     (Ground, Flora) was covered by an opaque rectangle and never appeared. */
 }
 
-.c-space {
-  @apply sm:px-10 px-5 lg:px-15;
+section[id] {
+  scroll-margin-top: 104px;
 }
 
-.hover-animation {
-  @apply hover:-translate-y-1 duration-200;
+::selection {
+  background: var(--magenta);
+  color: #ffffff;
 }
 
-.section-spacing {
-  @apply min-h-screen mt-20 md:mt-30;
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--ground); }
+::-webkit-scrollbar-thumb {
+  background: var(--magenta);
+  border-radius: 999px;
+  border: 3px solid var(--ground);
+  background-clip: content-box;
 }
 
-.text-heading {
-  @apply font-bold text-3xl md:text-4xl;
+/* ---------------- layout ---------------- */
+.shell {
+  @apply w-full max-w-[1200px] mx-auto px-5 sm:px-8;
 }
 
-.headtext {
-  @apply mt-2 mb-2 text-xl;
+.section {
+  @apply relative py-24 md:py-36;
 }
 
-.subtext {
-  @apply text-neutral-400 text-sm md:text-base text-pretty;
+/* Alternating surfaces. Every section sat on the same flat black, so the page
+   had no tonal rhythm at all — you could not tell one band from the next while
+   scrolling. A lifted section picks up its own accent as a wide vertical wash
+   and closes with hairlines top and bottom. Full-bleed: .section spans the
+   viewport, .shell is the column inside it. */
+.section[data-tone="lift"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--mood-solid) 7%, var(--ground-lift)) 22%,
+      color-mix(in srgb, var(--mood-solid) 9%, var(--ground-lift)) 78%,
+      transparent 100%
+    );
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
-/* Navigation */
-.nav-ul {
-  @apply flex flex-col items-center gap-4 sm:flex-row md:gap-6 relative z-20;
+/* a full-bleed accent hairline that glows, used to close a band */
+.section[data-tone="lift"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--mood-solid) 35%,
+    var(--mood-solid) 65%,
+    transparent
+  );
+  opacity: 0.5;
 }
 
-.nav-li {
-  @apply text-neutral-400 hover:text-white max-sm:w-full max-sm:rounded-md py-2 max-sm:px-5;
+/* ---------------- type ---------------- */
+.display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
 }
 
-.nav-link {
-  @apply text-lg md:text-base hover:text-white transition-colors;
+/* the outlined counterpart — used for the half of a headline that should
+   recede, so a single line carries two weights of emphasis */
+.display-ghost {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ink-soft);
 }
-/* Button Components */
+
+/* a label set vertically down the left edge of a section */
+.rail-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Was a wonky serif italic. Now the mono voice inside a display line —
+   a readout dropped into a headline. Same hook, opposite temperature. */
+.display-italic {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  font-style: normal;
+  letter-spacing: -0.01em;
+}
+
+/* Type that carries the accent as a gradient rather than a flat fill — the
+   only place on the site where two neons meet inside one object. */
+.display-accent {
+  background-image: linear-gradient(
+    100deg,
+    var(--mood-solid) 0%,
+    color-mix(in srgb, var(--mood-solid) 50%, var(--mood-counter)) 55%,
+    var(--mood-counter) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* the instrument label: 03 / STACK, ST. JOHN'S · UTC−03:30 */
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.kicker {
+  @apply inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-medium uppercase;
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--mood-solid) 34%, transparent);
+  background: var(--mood);
+  color: var(--mood-solid);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
+}
+
+.lede {
+  color: var(--ink-soft);
+  line-height: 1.62;
+}
+
+/* ---------------- objects ---------------- */
+/* Every panel is glass over the city: a hairline, a whisper of fill, and
+   a lit top edge. No lip, no press — the toy shadow is gone. */
+.toy {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(240, 233, 247, 0.05) 0%, rgba(240, 233, 247, 0.015) 100%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(240, 233, 247, 0.06);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
+}
+
+.toy-press:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--mood-solid) 45%, transparent);
+  box-shadow:
+    var(--shadow-lift),
+    inset 0 1px 0 rgba(240, 233, 247, 0.08),
+    0 0 32px -10px color-mix(in srgb, var(--mood-solid) 70%, transparent);
+}
+
+.toy-press:active {
+  transform: translateY(-1px);
+}
+
+.pill {
+  @apply inline-flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase;
+  font-family: var(--font-mono);
+  letter-spacing: 0.16em;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--glass);
+  color: var(--ink-soft);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              background var(--dur) var(--ease);
+}
+
+.pill:hover {
+  color: var(--ink);
+  border-color: var(--lip);
+}
+
+/* the one pill that carries the accent — hairline and text, never a fill */
+.pill-accent {
+  border-color: color-mix(in srgb, var(--mood-solid) 40%, transparent);
+  background: var(--mood);
+  color: var(--mood-solid);
+}
+
+/* ---------------- buttons ---------------- */
 .btn {
-  @apply relative px-1 py-4 text-sm text-center rounded-full font-extralight bg-primary w-[12rem] cursor-pointer overflow-hidden;
+  @apply relative inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  letter-spacing: -0.01em;
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur) var(--ease),
+              background var(--dur) var(--ease), color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
+  white-space: nowrap;
 }
 
-/* About Section */
-.grid-1 {
-  @apply row-span-2 md:col-span-3 h-[15rem] md:h-full relative overflow-hidden hover:-translate-y-1 duration-200;
+/* primary: the one bright object on the page */
+.btn-ink {
+  background: var(--ink);
+  color: var(--ground);
+  box-shadow: 0 0 30px -12px rgba(240, 233, 247, 0.5);
 }
-.grid-2 {
-  @apply row-span-1 md:col-span-3 h-[15rem] md:h-full relative overflow-hidden hover:-translate-y-1 duration-200;
-}
-.grid-3 {
-  @apply row-span-1 md:col-span-3 h-[15rem] md:h-full relative overflow-hidden hover:-translate-y-1 duration-200;
-}
-.grid-4 {
-  @apply row-span-1 md:col-span-2 h-[15rem] md:h-full relative overflow-hidden hover:-translate-y-1 duration-200;
-}
-.grid-5 {
-  @apply row-span-1 md:col-span-4 h-[15rem] md:h-full relative overflow-hidden hover:-translate-y-1 duration-200;
+.btn-ink:hover {
+  box-shadow: 0 0 40px -8px rgba(240, 233, 247, 0.7);
 }
 
-.grid-default-color {
-  @apply p-6 bg-gradient-to-b from-storm to-indigo rounded-2xl;
+.btn-pop {
+  background: var(--magenta);
+  color: #ffffff;
+  box-shadow: 0 0 34px -10px var(--magenta);
+}
+.btn-pop:hover {
+  box-shadow: 0 0 46px -6px var(--magenta);
 }
 
-.grid-special-color {
-  @apply p-6 bg-gradient-to-b from-royal to-lavender rounded-2xl;
+.btn-plain {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--lip);
 }
-.grid-black-color {
-  @apply p-6 bg-gradient-to-tl from-[#3A3A3A] via-[#242424] to-[#3A3A3A] rounded-2xl;
-}
-
-/* Contact Section*/
-.field-label {
-  @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
-}
-
-.field-input {
-  @apply w-full min-h-10 rounded-md px-3 py-2 text-sm bg-white/10 transition duration-200 placeholder-neutral-500 border border-white/10 mt-2;
+.btn-plain:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 28px -14px var(--cyan);
 }
 
-.field-input-focus {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20;
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+
+/* ---------------- links ---------------- */
+.link-underline {
+  position: relative;
+  font-weight: 500;
+  transition: color var(--dur) var(--ease);
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--mood-solid);
+  box-shadow: 0 0 10px var(--mood-solid);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease);
+}
+.link-underline:hover { color: var(--mood-solid); }
+.link-underline:hover::after { transform: scaleX(1); }
+
+/* ---------------- atmosphere ---------------- */
+/* Was paper grain. Now the fine horizontal scanline of a screen you are
+   looking *at* rather than through. Kept far below the threshold of
+   being noticed on purpose. */
+.grain {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.028) 0px,
+    rgba(255, 255, 255, 0.028) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.hairline {
+  border-top: 1px solid var(--line);
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

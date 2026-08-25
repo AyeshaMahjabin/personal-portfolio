@@ -1,54 +1,116 @@
-import React, { useState } from 'react';
-import { FaLinkedin, FaGithub } from 'react-icons/fa';
-import { IoMdMail } from 'react-icons/io';
-import { HiDocument } from 'react-icons/hi';
-import Dock from '../components/Dock';
+import { useState } from "react";
+import { motion } from "motion/react";
+import SectionHeading from "../ui/SectionHeading";
+import Reveal from "../ui/Reveal";
+import Magnetic from "../ui/Magnetic";
+import { bang } from "../lib/fluid";
+import { copyText } from "../lib/clipboard";
+import { useMood, useScene, ZONE } from "../scene/store";
+import { links, profile } from "../data/site";
 
-const resumeUrl = "/assets/resume.pdf"; // Place your PDF in public/assets
-
-const items = [
-  {
-    icon: <FaLinkedin size={18} />,
-    label: 'LinkedIn',
-    onClick: () => window.open('https://www.linkedin.com/in/ayesha-m-n', '_blank'),
-  },
-  {
-    icon: <FaGithub size={18} />,
-    label: 'GitHub',
-    onClick: () => window.open('http://github.com/AyeshaMahjabin ', '_blank'),
-  },
-  {
-    icon: <HiDocument size={18} />,
-    label: 'Resume',
-    onClick: () => window.open(resumeUrl, '_blank'),
-  },
-  {
-    icon: <IoMdMail size={18} />,
-    label: 'Email',
-    onClick: () => window.location.href= 'mailto:amnishat@mun.ca',
-  },
+const ELSEWHERE = [
+  { label: "GitHub", href: links.github },
+  { label: "LinkedIn", href: links.linkedin },
+  { label: "Résumé", href: links.resume },
 ];
 
-const Contact = () => {
-  const [message, setMessage] = useState('');
+/**
+ * The ending, rebuilt as a finale rather than a centred card.
+ *
+ * It used to be one big tinted box holding three solid-neon pills — the last
+ * candy left on the site, and the only section that skipped the rail-and-
+ * numeral system every other section opens with. Now the address itself is the
+ * largest thing on the page: one enormous mailto you cannot miss, hairline
+ * links underneath, and the whole block set left like everything above it.
+ */
+export default function Contact() {
+  const ref = useMood("violet", ZONE.LOUD);
+  const { reduced, toast } = useScene();
+  const [copied, setCopied] = useState(false);
+
+  const copy = async (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const ok = await copyText(profile.email);
+
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+      bang(r.left + r.width / 2, r.top + r.height / 2);
+      toast?.({ title: "Copied", body: profile.email, emoji: "✦" });
+    } else {
+      toast?.({ title: profile.email, body: "Select and copy the address above." });
+    }
+  };
+
   return (
-    <section id="contact" className="c-space section spacing flex flex-col items-center justify-center min-h-screen">
-      <h2 className="text-heading mb-8">Contact</h2>
-      <Dock
-        items={items}
-        panelHeight={80}
-        baseItemSize={50}
-        magnification={70}
-        distance={80}
-        spring={{
-          mass: 1,
-          stiffness: 300,
-          damping: 40,
-        }}
-      />
-      
+    <section id="contact" ref={ref} className="section pb-0" data-tone="lift">
+      <div className="shell">
+        <SectionHeading
+          index="06"
+          kicker="contact"
+          title="Get in"
+          italic="touch."
+          note="Open to new-grad and internship software roles for 2027. Email is the fastest way to reach me."
+        />
+
+        {/* the address, as the largest object on the page */}
+        <Reveal>
+          <a
+            href={links.email}
+            className="group block border-t border-line pt-10"
+            aria-label={`Email ${profile.email}`}
+          >
+            <span className="flex items-baseline gap-4 font-mono text-[10px] uppercase tracking-[0.24em] text-inkfaint">
+              <span style={{ color: "var(--mood-solid)" }}>write to me</span>
+              <span className="h-px flex-1 bg-[var(--line)]" />
+            </span>
+
+            <motion.span
+              className="display mt-6 block break-all text-[clamp(1.6rem,6.4vw,4.6rem)]
+                         transition-colors duration-[300ms] group-hover:text-[var(--mood-solid)]"
+              whileHover={reduced ? undefined : { x: 10 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            >
+              {profile.email}
+            </motion.span>
+          </a>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <div className="mt-12 flex flex-wrap items-center gap-x-10 gap-y-6">
+            <Magnetic>
+              <button onClick={copy} className="btn btn-ink min-w-[10.5rem]">
+                {copied ? "Copied ✓" : "Copy address"}
+              </button>
+            </Magnetic>
+
+            <ul className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              {ELSEWHERE.map((l) => (
+                <li key={l.label}>
+                  <a
+                    href={l.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group inline-flex items-baseline gap-2 font-mono text-[11px]
+                               uppercase tracking-[0.2em] text-inksoft transition-colors
+                               duration-[240ms] hover:text-ink"
+                  >
+                    <span
+                      className="relative after:absolute after:-bottom-1 after:left-0 after:h-px
+                                 after:w-full after:origin-left after:scale-x-0
+                                 after:bg-[var(--mood-solid)] after:transition-transform
+                                 after:duration-[380ms] group-hover:after:scale-x-100"
+                    >
+                      {l.label}
+                    </span>
+                    <span style={{ color: "var(--mood-solid)" }}>↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </div>
     </section>
   );
-};
-
-export default Contact;
+}

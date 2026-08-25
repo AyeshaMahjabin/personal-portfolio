@@ -1,123 +1,70 @@
-"use client";
-
 import createGlobe from "cobe";
-import { useMotionValue, useSpring } from "motion/react";
 import { useEffect, useRef } from "react";
 
-import { twMerge } from "tailwind-merge";
-
-const MOVEMENT_DAMPING = 1400;
-
-const GLOBE_CONFIG = {
-  width: 800,
-  height: 800,
-  onRender: () => {},
-  devicePixelRatio: 2,
-  phi: 0,
-  theta: 0.3,
-  dark: 1,
-  diffuse: 0.4,
-  mapSamples: 16000,
-  mapBrightness: 1.2,
-  baseColor: [1, 1, 1],
-  markerColor: [1, 1, 1],
-  glowColor: [1, 1, 1],
-  markers: [
-    { location: [14.5995, 120.9842], size: 0.03 },
-    { location: [19.076, 72.8777], size: 0.1 },
-    { location: [23.8103, 90.4125], size: 0.05 },
-    { location: [30.0444, 31.2357], size: 0.07 },
-    { location: [39.9042, 116.4074], size: 0.08 },
-    { location: [-23.5505, -46.6333], size: 0.1 },
-    { location: [19.4326, -99.1332], size: 0.1 },
-    { location: [40.7128, -74.006], size: 0.1 },
-    { location: [34.6937, 135.5022], size: 0.05 },
-    { location: [41.0082, 28.9784], size: 0.06 },
-  ],
-};
-
-export function Globe({ className, config = GLOBE_CONFIG }) {
-  let phi = 0;
-  let width = 0;
+/** A dark globe lit in the site palette, with one marker on it: St. John's. */
+export default function Globe({ className = "" }) {
   const canvasRef = useRef(null);
-  const pointerInteracting = useRef(null);
-  const pointerInteractionMovement = useRef(0);
-
-  const r = useMotionValue(0);
-  const rs = useSpring(r, {
-    mass: 1,
-    damping: 30,
-    stiffness: 100,
-  });
-
-  const updatePointerInteraction = (value) => {
-    pointerInteracting.current = value;
-    if (canvasRef.current) {
-      canvasRef.current.style.cursor = value !== null ? "grabbing" : "grab";
-    }
-  };
-
-  const updateMovement = (clientX) => {
-    if (pointerInteracting.current !== null) {
-      const delta = clientX - pointerInteracting.current;
-      pointerInteractionMovement.current = delta;
-      r.set(r.get() + delta / MOVEMENT_DAMPING);
-    }
-  };
 
   useEffect(() => {
-    const onResize = () => {
-      if (canvasRef.current) {
-        width = canvasRef.current.offsetWidth;
-      }
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let phi = 4.15; // facing the north Atlantic
+    let width = canvas.offsetWidth || 200;
+    let globe = null;
+
+    const start = () => {
+      globe?.destroy();
+      globe = createGlobe(canvas, {
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        width: width * 2,
+        height: width * 2,
+        phi,
+        theta: 0.36,
+        dark: 1,
+        diffuse: 2.2,
+        mapSamples: 18000,
+        mapBrightness: 5.2,
+        /* landmass in cold violet, the marker in magenta, rim glow cyan —
+           the same three neons the rest of the page uses */
+        baseColor: [0.28, 0.16, 0.44],
+        markerColor: [1, 0.18, 0.53],
+        glowColor: [0.0, 0.55, 0.75],
+        markers: [{ location: [47.5615, -52.7126], size: 0.1 }],
+        onRender: (state) => {
+          phi += 0.0035;
+          state.phi = phi;
+          state.width = width * 2;
+          state.height = width * 2;
+        },
+      });
+      canvas.style.opacity = "1";
     };
 
-    window.addEventListener("resize", onResize);
-    onResize();
-
-    const globe = createGlobe(canvasRef.current, {
-      ...config,
-      width: width * 2,
-      height: width * 2,
-      onRender: (state) => {
-        if (!pointerInteracting.current) phi += 0.005;
-        state.phi = phi + rs.get();
-        state.width = width * 2;
-        state.height = width * 2;
-      },
+    /* cobe sizes its buffer once, so re-create it whenever the card resizes */
+    const ro = new ResizeObserver(([entry]) => {
+      const next = Math.round(entry.contentRect.width);
+      if (next > 0 && Math.abs(next - width) > 8) {
+        width = next;
+        start();
+      }
     });
 
-    setTimeout(() => (canvasRef.current.style.opacity = "1"), 0);
+    width = canvas.offsetWidth || 200;
+    start();
+    ro.observe(canvas);
+
     return () => {
-      globe.destroy();
-      window.removeEventListener("resize", onResize);
+      ro.disconnect();
+      globe?.destroy();
     };
-  }, [rs, config]);
+  }, []);
 
   return (
-    <div
-      className={twMerge(
-        "mx-auto aspect-[1/1] w-full max-w-[600px]",
-        className
-      )}
-    >
-      <canvas
-        className={twMerge(
-          "size-[30rem] opacity-0 transition-opacity duration-500 [contain:layout_paint_size]"
-        )}
-        ref={canvasRef}
-        onPointerDown={(e) => {
-          pointerInteracting.current = e.clientX;
-          updatePointerInteraction(e.clientX);
-        }}
-        onPointerUp={() => updatePointerInteraction(null)}
-        onPointerOut={() => updatePointerInteraction(null)}
-        onMouseMove={(e) => updateMovement(e.clientX)}
-        onTouchMove={(e) =>
-          e.touches[0] && updateMovement(e.touches[0].clientX)
-        }
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className={`aspect-square w-full opacity-0 transition-opacity duration-700 ${className}`}
+    />
   );
 }
-export default Globe;

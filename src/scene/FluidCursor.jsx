@@ -1,19 +1,21 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { ZONE, getZone, zoneGain, registerBang, setStatus } from '../lib/fluid';
 
 function SplashCursor({
-  SIM_RESOLUTION = 128,
+  SIM_RESOLUTION = 160,
   DYE_RESOLUTION = 1440,
   CAPTURE_RESOLUTION = 512,
-  DENSITY_DISSIPATION = 20,
-  VELOCITY_DISSIPATION = 20  ,
-  PRESSURE = 0.3,
+  DENSITY_DISSIPATION = 4.4,
+  VELOCITY_DISSIPATION = 2.8,
+  PRESSURE = 0.8,
   PRESSURE_ITERATIONS = 10,
-  CURL = 3,
-  SPLAT_RADIUS = 0.35,
-  SPLAT_FORCE = 8000,
+  CURL = 2.5,
+  SPLAT_RADIUS = 0.16,
+  SPLAT_FORCE = 5200,
   SHADING = true,
-  COLOR_UPDATE_SPEED = 10,
+  COLOR_UPDATE_SPEED = 2.2,
+  DYE_GAIN = 1.0,
   BACK_COLOR = { r: 0.5, g: 0, b: 0 },
   TRANSPARENT = true
 }) {
@@ -21,7 +23,17 @@ function SplashCursor({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      setStatus('failed', 'no canvas');
+      return;
+    }
+
+    let rafId = 0;
+    const bound = [];
+    const on = (target, type, fn, opts) => {
+      target.addEventListener(type, fn, opts);
+      bound.push(() => target.removeEventListener(type, fn, opts));
+    };
 
     function pointerPrototype() {
       this.id = -1;
@@ -49,6 +61,7 @@ function SplashCursor({
       SPLAT_FORCE,
       SHADING,
       COLOR_UPDATE_SPEED,
+      DYE_GAIN,
       PAUSED: false,
       BACK_COLOR,
       TRANSPARENT,
@@ -81,6 +94,7 @@ function SplashCursor({
       let supportLinearFiltering;
       if (isWebGL2) {
         gl.getExtension('EXT_color_buffer_float');
+        gl.getExtension('EXT_color_buffer_half_float');
         supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
       } else {
         halfFloat = gl.getExtension('OES_texture_half_float');
@@ -88,7 +102,7 @@ function SplashCursor({
       }
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-      const halfFloatTexType = isWebGL2
+      let halfFloatTexType = isWebGL2
         ? gl.HALF_FLOAT
         : halfFloat && halfFloat.HALF_FLOAT_OES;
       let formatRGBA;
@@ -103,6 +117,24 @@ function SplashCursor({
         formatRGBA = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
         formatRG = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
         formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
+      }
+
+      /* No float render target anywhere — software rendering, some integrated
+         GPUs, some drivers. The old chain bottomed out at null and the caller
+         dereferenced it, so the simulation threw on mount and the boundary
+         swallowed it. Eight-bit is universally renderable: the field loses
+         precision nobody can see at this resolution, and it actually runs. */
+      if (!formatRGBA) {
+        halfFloatTexType = gl.UNSIGNED_BYTE;
+        formatRGBA = getSupportedFormat(
+          gl,
+          isWebGL2 ? gl.RGBA8 : gl.RGBA,
+          gl.RGBA,
+          halfFloatTexType
+        );
+        formatRG = formatRGBA;
+        formatR = formatRGBA;
+        supportLinearFiltering = true;
       }
 
       return {
@@ -759,7 +791,7 @@ function SplashCursor({
       applyInputs();
       step(dt);
       render(null);
-      requestAnimationFrame(updateFrame);
+      rafId = requestAnimationFrame(updateFrame);
     }
 
     function calcDeltaTime() {
@@ -792,6 +824,11 @@ function SplashCursor({
     }
 
     function applyInputs() {
+      if (getZone() === ZONE.OFF) {
+        // still clear the flag, or the whole gesture replays on re-entry
+        pointers.forEach((p) => (p.moved = false));
+        return;
+      }
       pointers.forEach((p) => {
         if (p.moved) {
           p.moved = false;
@@ -925,20 +962,50 @@ function SplashCursor({
     }
 
     function splatPointer(pointer) {
-      let dx = pointer.deltaX * config.SPLAT_FORCE;
-      let dy = pointer.deltaY * config.SPLAT_FORCE;
+      const g = zoneGain();
+      let dx = pointer.deltaX * config.SPLAT_FORCE * g;
+      let dy = pointer.deltaY * config.SPLAT_FORCE * g;
       splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
     }
 
-    function clickSplat(pointer) {
-      const color = generateColor();
-      color.r *= 10.0;
-      color.g *= 10.0;
-      color.b *= 10.0;
-      let dx = 10 * (Math.random() - 0.5);
-      let dy = 30 * (Math.random() - 0.5);
-      splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color);
+    /* One splat is a dot. A bang is a burst thrown outward from the point of
+       impact: a bright core, then a ring of splats with randomised angle and
+       force so the edge breaks up instead of reading as a circle. */
+    function burstAt(tx, ty) {
+      if (getZone() === ZONE.OFF) return;
+      const g = zoneGain();
+
+      const core = generateColor();
+      core.r *= 7;
+      core.g *= 7;
+      core.b *= 7;
+      splat(tx, ty, 0, 0, core);
+
+      const arms = 9;
+      const spin = Math.random() * Math.PI * 2;
+      for (let i = 0; i < arms; i++) {
+        const a = spin + (i / arms) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+        const force = (900 + Math.random() * 1500) * g;
+        const color = generateColor();
+        color.r *= 3.4;
+        color.g *= 3.4;
+        color.b *= 3.4;
+        splat(tx, ty, Math.cos(a) * force, Math.sin(a) * force, color);
+      }
     }
+
+    function clickSplat(pointer) {
+      burstAt(pointer.texcoordX, pointer.texcoordY);
+    }
+
+    /* Let the rest of the app throw a bang without knowing any of this. */
+    const unregisterBang = registerBang((clientX, clientY) => {
+      burstAt(
+        scaleByPixelRatio(clientX) / canvas.width,
+        1 - scaleByPixelRatio(clientY) / canvas.height
+      );
+    });
+    bound.push(unregisterBang);
 
     function splat(x, y, dx, dy, color) {
       splatProgram.bind();
@@ -1008,12 +1075,57 @@ function SplashCursor({
       return delta;
     }
 
+    /* The dye is not random: it is pulled from the live palette variables, so
+       the fluid is always wearing whatever colours the current time of day is
+       wearing. Read once every few seconds rather than per splat. */
+    let paletteCache = null;
+    let paletteReadAt = 0;
+
+    function readPalette() {
+      const now = Date.now();
+      if (paletteCache && now - paletteReadAt < 2000) return paletteCache;
+      paletteReadAt = now;
+      const cs = getComputedStyle(document.documentElement);
+      const parse = (name, fallback) => {
+        const raw = cs.getPropertyValue(name).trim();
+        if (raw.startsWith('#')) {
+          const h = raw.slice(1);
+          const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+          const n = parseInt(full, 16);
+          if (Number.isNaN(n)) return fallback;
+          return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+        }
+        const m = raw.match(/-?\d+(\.\d+)?/g);
+        if (!m || m.length < 3) return fallback;
+        return [+m[0] / 255, +m[1] / 255, +m[2] / 255];
+      };
+      paletteCache = [
+        parse("--magenta", [1, 0.18, 0.53]),
+        parse("--cyan", [0, 0.85, 1]),
+        parse("--violet-neon", [0.69, 0.29, 1]),
+      ];
+      return paletteCache;
+    }
+
+    /* Dye is pulled from the live palette, but a flat lerp between two neons
+       reads muddy in motion. Two things fix it: a wide brightness jitter so
+       consecutive splats separate, and an occasional white-hot core — the
+       overexposed centre is what makes a splat look like it has energy
+       rather than like a stain. Zone gain scales the whole thing so the same
+       sim can whisper under body copy and shout on the hero. */
     function generateColor() {
-      let c = HSVtoRGB(Math.random(), 1.0, 1.0);
-      c.r *= 0.15;
-      c.g *= 0.15;
-      c.b *= 0.15;
-      return c;
+      const palette = readPalette();
+      const a = palette[(Math.random() * palette.length) | 0];
+      const b = palette[(Math.random() * palette.length) | 0];
+      const m = Math.random();
+      const jitter = 0.55 + Math.random() * 1.15;
+      const hot = Math.random() < 0.14 ? 0.42 : 0;
+      const gain = config.DYE_GAIN * jitter * zoneGain();
+      return {
+        r: (a[0] + (b[0] - a[0]) * m + hot) * gain,
+        g: (a[1] + (b[1] - a[1]) * m + hot) * gain,
+        b: (a[2] + (b[2] - a[2]) * m + hot) * gain,
+      };
     }
 
     function HSVtoRGB(h, s, v) {
@@ -1091,7 +1203,7 @@ function SplashCursor({
       return hash;
     }
 
-    window.addEventListener('mousedown', (e) => {
+    on(window, 'mousedown', (e) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
@@ -1099,37 +1211,23 @@ function SplashCursor({
       clickSplat(pointer);
     });
 
-    document.body.addEventListener('mousemove', function handleFirstMouseMove(e) {
+    on(document.body, 'mousemove', function handleFirstMouseMove(e) {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
       let color = generateColor();
-      updateFrame();
       updatePointerMoveData(pointer, posX, posY, color);
       document.body.removeEventListener('mousemove', handleFirstMouseMove);
     });
 
-    window.addEventListener('mousemove', (e) => {
+    on(window, 'mousemove', (e) => {
       let pointer = pointers[0];
       let posX = scaleByPixelRatio(e.clientX);
       let posY = scaleByPixelRatio(e.clientY);
-      let color = pointer.color;
-      updatePointerMoveData(pointer, posX, posY, color);
+      updatePointerMoveData(pointer, posX, posY, pointer.color);
     });
 
-    document.body.addEventListener('touchstart', function handleFirstTouchStart(e) {
-      const touches = e.targetTouches;
-      let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        let posX = scaleByPixelRatio(touches[i].clientX);
-        let posY = scaleByPixelRatio(touches[i].clientY);
-        updateFrame();
-        updatePointerDownData(pointer, touches[i].identifier, posX, posY);
-      }
-      document.body.removeEventListener('touchstart', handleFirstTouchStart);
-    });
-
-    window.addEventListener('touchstart', (e) => {
+    on(window, 'touchstart', (e) => {
       const touches = e.targetTouches;
       let pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
@@ -1137,32 +1235,52 @@ function SplashCursor({
         let posY = scaleByPixelRatio(touches[i].clientY);
         updatePointerDownData(pointer, touches[i].identifier, posX, posY);
       }
-    });
+    }, { passive: true });
 
-    window.addEventListener(
-      'touchmove',
-      (e) => {
-        const touches = e.targetTouches;
-        let pointer = pointers[0];
-        for (let i = 0; i < touches.length; i++) {
-          let posX = scaleByPixelRatio(touches[i].clientX);
-          let posY = scaleByPixelRatio(touches[i].clientY);
-          updatePointerMoveData(pointer, posX, posY, pointer.color);
-        }
-      },
-      false
-    );
+    on(window, 'touchmove', (e) => {
+      const touches = e.targetTouches;
+      let pointer = pointers[0];
+      for (let i = 0; i < touches.length; i++) {
+        let posX = scaleByPixelRatio(touches[i].clientX);
+        let posY = scaleByPixelRatio(touches[i].clientY);
+        updatePointerMoveData(pointer, posX, posY, pointer.color);
+      }
+    }, { passive: true });
 
-    window.addEventListener('touchend', (e) => {
+    on(window, 'touchend', (e) => {
       const touches = e.changedTouches;
       let pointer = pointers[0];
-      for (let i = 0; i < touches.length; i++) {
-        updatePointerUpData(pointer);
+      for (let i = 0; i < touches.length; i++) updatePointerUpData(pointer);
+    });
+
+    /* Pause the simulation whenever the tab is hidden or the whole thing has
+       scrolled out of relevance - no reason to burn a GPU on a background tab. */
+    on(document, 'visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      } else if (!rafId) {
+        lastUpdateTime = Date.now();
+        updateFrame();
       }
     });
 
+    setStatus('running');
     updateFrame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      setStatus('idle');
+      cancelAnimationFrame(rafId);
+      bound.forEach((off) => off());
+      /* Deliberately NOT calling WEBGL_lose_context.loseContext() here.
+         StrictMode runs mount -> cleanup -> mount against the same <canvas>,
+         so destroying the context on teardown left the second mount holding a
+         dead one: every checkFramebufferStatus failed, getSupportedFormat
+         returned null, and initFramebuffers threw before a single frame drew.
+         The canvas leaves the DOM with the component, so the context is
+         collected on its own. */
+    };
+     
   }, [
     SIM_RESOLUTION,
     DYE_RESOLUTION,
@@ -1176,6 +1294,7 @@ function SplashCursor({
     SPLAT_FORCE,
     SHADING,
     COLOR_UPDATE_SPEED,
+    DYE_GAIN,
     BACK_COLOR,
     TRANSPARENT,
   ]);
@@ -1186,7 +1305,12 @@ function SplashCursor({
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 50,
+        /* Above the page, below the reticle. The display shader already
+           writes alpha = max(r,g,b), so the canvas is genuinely transparent
+           where there is no dye and composites correctly on its own. It used
+           to also carry mix-blend-mode: screen, which added a stacking-context
+           dependency it never needed. */
+        zIndex: 70,
         pointerEvents: 'none',
         width: '100%',
         height: '100%',

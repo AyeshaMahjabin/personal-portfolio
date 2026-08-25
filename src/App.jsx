@@ -1,31 +1,76 @@
-import React from 'react'
-import SplashCursor from './components/SplashCursor';
-import Navbar from './sections/Navbar';
+import { SceneProvider } from "./scene/Provider";
+import { useScene } from "./scene/store";
+import Ground from "./scene/Ground";
+import Flora from "./scene/Flora";
+import FluidCursor from "./scene/FluidCursor";
+import Reticle from "./scene/Reticle";
+import Toasts from "./scene/Toasts";
+import Confetti from "./scene/Confetti";
+import Boundary from "./ui/Boundary";
+import Ticker from "./ui/Ticker";
+import CommandPalette from "./ui/CommandPalette";
+import ScrollRail from "./ui/ScrollRail";
+import Navbar from "./sections/Navbar";
 import Hero from "./sections/Hero";
+import Work from "./sections/Work";
+import Experience from "./sections/Experience";
+import Skills from "./sections/Skills";
+import Playground from "./sections/Playground";
 import About from "./sections/About";
-import Projects from "./sections/Projects";
 import Contact from "./sections/Contact";
-const App = () => {
+import Footer from "./sections/Footer";
+
+const STATUS = [
+  "st. john's · nl",
+  "utc−03:30",
+  "react · typescript · mongodb · playwright",
+  "open to 2027 roles",
+  "cs @ memorial university",
+];
+
+function Site() {
+  /* Touch devices get neither — there is no cursor to trail. Everything else
+     gets both, always. */
+  const { coarse } = useScene();
+
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#3b3349] via-[#0c0824] to-[#520d87]">
-      
+    <>
+      <Ground />
+      <Flora />
 
-    <SplashCursor/>
-    <Navbar/>
-    <Hero/>
-    <About/>
-    <Projects/>
-    <Contact/>
-    
-    
-    
-    <footer className="text-center text-gray-400 text-sm p-4">
-      © {new Date().getFullYear()} Ayesha Mahjabin Nishat. All rights reserved.
-    </footer>
-    
-    
-    </div>
+      {!coarse && (
+        <Boundary>
+          <FluidCursor />
+        </Boundary>
+      )}
+      {!coarse && <Reticle />}
+
+      <Navbar />
+      <ScrollRail />
+
+      <main className="relative z-[1]">
+        <Hero />
+        <Work />
+        <Experience />
+        <Skills />
+        <Playground />
+        <About />
+        <Contact />
+        <Footer />
+      </main>
+
+      <CommandPalette />
+      <Ticker items={STATUS} />
+      <Toasts />
+      <Confetti />
+    </>
   );
-};
+}
 
-export default App;
+export default function App() {
+  return (
+    <SceneProvider>
+      <Site />
+    </SceneProvider>
+  );
+}
